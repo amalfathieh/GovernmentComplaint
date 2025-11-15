@@ -20,6 +20,7 @@ class AdminSeeder extends Seeder
             'phone' => '0987654321',
             'role' => 'admin',
             'password'=>'admin123',
+             'email_verified_at' => now()
         ]);
     }
 }

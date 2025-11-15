@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\Auth\OtpController;
 use App\Http\Controllers\Api\EmployeeController;
+use App\Http\Controllers\OrganizationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -34,10 +35,10 @@ Route::controller(OtpController::class)->group(function () {
     Route::post('/resend-otp', 'resendOtp');
 });
 
-//Route::get('organizations', [OrganizationController::class, 'getOrganizations']);
+Route::get('organizations', [OrganizationController::class, 'getOrganizations']);
 
 
-Route::prefix('employees')->middleware(['auth:sanctum', 'is_admin'])
+Route::prefix('employees')->middleware(['auth:sanctum', \App\Http\Middleware\IsAdmin::class])
     ->controller(EmployeeController::class)->group(function () {
 
     Route::post('new', 'store');
