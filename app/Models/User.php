@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -24,6 +25,8 @@ class User extends Authenticatable
         'phone',
         'password',
         'user',
+        'organization_id',
+        'role',
         'email_verified_at'
     ];
 
@@ -46,4 +49,56 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'phone_verified_at' => 'datetime',
     ];
+
+
+    public function scopeFilter(Builder $builder, $filter){
+
+        $builder->when($filter['organization'] ?? false, function($builder, $value) {
+            $builder->where('organization','Like', "%{$value}%");
+        });
+        $builder->when($filter['status'] ?? false, function($builder, $value) {
+            $builder->where('status', $value);
+        });
+    }
+
+    public function organization()
+    {
+        return $this->belongsTo(Organization::class);
+    }
+
+    public function scopeEmployees($query)
+    {
+        return $query->where('role', 'employee');
+    }
+
+    public function scopeFilterByOrganization($query, $organizationId)
+    {
+        if ($organizationId) {
+            return $query->where('organization_id', $organizationId);
+        }
+
+        return $query;
+    }
+
+    public function scopeFilterByName($query, $name)
+    {
+        if ($name) {
+            return $query->where(function ($q) use ($name) {
+                $q->where('first_name', 'like', "%{$name}%")
+                    ->orWhere('last_name', 'like', "%{$name}%");
+            });
+        }
+
+        return $query;
+    }
+
+    public function scopeFilterByEmail($query, $email)
+    {
+        if ($email) {
+            return $query->where('email', 'like', "%{$email}%");
+        }
+
+        return $query;
+    }
+
 }

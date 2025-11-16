@@ -41,7 +41,9 @@ Route::get('organizations', [OrganizationController::class, 'getOrganizations'])
 Route::prefix('employees')->middleware(['auth:sanctum', \App\Http\Middleware\IsAdmin::class])
     ->controller(EmployeeController::class)->group(function () {
 
-    Route::post('new', 'store');
+        Route::post('new', 'store');
+
+        Route::get('/', 'getAll');
 
 });
 

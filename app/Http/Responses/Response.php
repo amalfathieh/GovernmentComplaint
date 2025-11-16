@@ -8,7 +8,7 @@ use Illuminate\Http\JsonResponse;
 
 class Response
 {
-    public static function Success( $data, $message , $statusCode=200) :JsonResponse
+    public static function Success( $data, $message="" , $statusCode=200) :JsonResponse
     {
         return response()->json([
             'data' =>$data,

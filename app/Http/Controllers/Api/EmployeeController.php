@@ -27,6 +27,7 @@ class EmployeeController extends Controller
             'role'             => 'employee',
             'organization_id'  => $request->organization_id,
             'password'         => Hash::make($password),
+            'email_verified_at' =>now(),
         ]);
 
         // إرسال كلمة المرور عبر البريد
@@ -35,4 +36,27 @@ class EmployeeController extends Controller
         return Response::Success($employee, 'Employee created successfully and email sent.', 201);
 
     }
+
+/*
+ * GET /employees?organization_id=3
+ * GET /employees?name=ah
+ * GET /employees?organization_id=3&name=mohammad
+ */
+    public function getAll(Request $request)
+    {
+        try {
+            $employees = User::with('organization')
+                ->employees()
+                ->filterByOrganization($request->organization_id)
+                ->filterByName($request->name)
+                ->filterByEmail($request->email)
+                ->get();
+
+            return Response::Success($employees);
+
+        } catch (\Exception $e) {
+            return Response::Error($e->getMessage());
+        }
+    }
+
 }
