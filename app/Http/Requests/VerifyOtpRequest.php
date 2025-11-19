@@ -2,7 +2,12 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Responses\Response;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Validation\ValidationException;
 
 class VerifyOtpRequest extends FormRequest
 {
@@ -25,5 +30,13 @@ class VerifyOtpRequest extends FormRequest
             'receiver' => 'required|string',   // email أو phone
             'code' => 'required|string|exists:otps,code',
         ];
+    }
+    public function failedValidation(Validator $validator)
+    {
+        $errors = (new ValidationException($validator))->errors();
+
+        throw new HttpResponseException(
+            Response::Error( $errors, JsonResponse::HTTP_UNPROCESSABLE_ENTITY)
+        );
     }
 }

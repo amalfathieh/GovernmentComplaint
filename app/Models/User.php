@@ -80,6 +80,11 @@ class User extends Authenticatable
         return $query;
     }
 
+    public function complaints()
+    {
+        return $this->hasMany(Complaint::class);
+    }
+
     public function scopeFilterByName($query, $name)
     {
         if ($name) {

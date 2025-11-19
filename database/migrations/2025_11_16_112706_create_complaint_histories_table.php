@@ -16,7 +16,8 @@ return new class extends Migration
             $table->foreignId('complaint_id')->constrained('complaints')->cascadeOnDelete();
             $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete(); // موظف أو Admin
             $table->string('action'); // modified_status, added_note, updated_info...
-            $table->text('details')->nullable(); // JSON أو نص
+            $table->json('old_snapshot')->nullable(); // full complaint snapshot BEFORE change
+            $table->json('new_snapshot')->nullable(); // full complaint snapshot AFTER change
             $table->timestamps();
         });
     }

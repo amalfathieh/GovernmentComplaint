@@ -9,34 +9,36 @@ use App\Http\Requests\PhoneRegisterRequest;
 use App\Http\Responses\Response;
 use App\Models\User;
 use App\Services\Auth\EmailRegisterStrategy;
-use App\Services\Auth\OtpService;
 use App\Services\Auth\PhoneRegisterStrategy;
-use App\Services\Auth\RegisterContext;
+use Symfony\Component\HttpFoundation\Request;
 
 class AuthController extends Controller
 {
     public function registerByEmail(EmailRegisterRequest $request)
     {
-        $context = new RegisterContext(new EmailRegisterStrategy());
-        $user = $context->execute($request->validated());
+        try {
+            $strategy = new EmailRegisterStrategy();
 
+            $user = $strategy->register($request->validated());
 
-        (new OtpService())->sendOtp($user['email'], 'email');
-
-        return Response::Success($user, 'Registered successfully and Verification code send to email pleas check your email');
-
+            return Response::Success($user, 'Registered successfully and Verification code send to email pleas check your email');
+        }catch (\Exception $ex) {
+            return Response::Error( $ex->getMessage());
+        }
     }
 
     public function registerByPhone(PhoneRegisterRequest $request)
     {
-        $context = new RegisterContext(new PhoneRegisterStrategy());
-        $user = $context->execute($request->validated());
+        try {
+            $strategy = new PhoneRegisterStrategy();
 
-        //send otp
-        (new OtpService())->sendOtp($user['phone'], 'phone');
+            $user = $strategy->register($request->validated());
 
-        return Response::Success($user, 'Registered successfully and Verification code send to whatsapp phone pleas check your whatsapp');
+            return Response::Success($user, 'Registered successfully and Verification code send to whatsapp phone pleas check your whatsapp');
 
+        }catch (\Exception $ex) {
+            return Response::Error( $ex->getMessage());
+        }
     }
 
 

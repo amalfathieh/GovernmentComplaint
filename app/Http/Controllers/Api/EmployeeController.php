@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateEmployeeRequest;
 use App\Http\Responses\Response;
+use App\Jobs\SendOtpJob;
 use App\Models\User;
 use App\Notifications\NewEmployeeNotification;
 use Illuminate\Http\Request;

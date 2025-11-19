@@ -30,6 +30,8 @@ return [
 
     'env' => env('APP_ENV', 'production'),
 
+    'green_instance_id' => env('GREEN_API_INSTANCE_ID', 'default_value'),
+    'green_api_token' => env('GREEN_API_TOKEN', 'default_value'),
     /*
     |--------------------------------------------------------------------------
     | Application Debug Mode

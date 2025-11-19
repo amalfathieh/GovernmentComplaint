@@ -3,7 +3,10 @@
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\Auth\OtpController;
 use App\Http\Controllers\Api\EmployeeController;
+use App\Http\Controllers\Api\ComplaintController;
 use App\Http\Controllers\OrganizationController;
+use App\Http\Middleware\EmployeeOrAdmin;
+use App\Http\Middleware\IsUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -47,6 +50,30 @@ Route::prefix('employees')->middleware(['auth:sanctum', \App\Http\Middleware\IsA
 
 });
 
+
+Route::middleware('auth:sanctum')->prefix('complaints')
+    ->controller(ComplaintController::class)->group(function () {
+
+        Route::middleware(IsUser::class)->group(function () {
+            // citizen: create complaint
+            Route::post('/', 'store');
+
+            // citizen: my complaints
+            Route::get('/me', 'myComplaints');
+
+        });
+
+        Route::middleware(EmployeeOrAdmin::class)->group(function () {
+            // employee and admin
+            Route::get('/', 'allComplaint');
+
+            // employee actions (you should protect with role middleware)
+            Route::get('/{complaint}/show', 'show');
+            Route::get('/{complaint}/unlock', 'unlock');
+            Route::put('/{complaint}/update', 'update');
+        });
+
+});
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();

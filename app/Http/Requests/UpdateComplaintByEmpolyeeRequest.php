@@ -9,7 +9,7 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
 
-class EmailRegisterRequest extends FormRequest
+class UpdateComplaintByEmpolyeeRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -27,13 +27,10 @@ class EmailRegisterRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'first_name'=>'required|string',
-            'last_name'=>'required|string',
-            'email' => 'required|string|email|lowercase|email|unique:users,email',
-            'password' => 'required|string|min:6',
+            'status' => 'nullable|in:new,under_review,in_progress,need_info,resolved,rejected,closed',
+            'note' => 'nullable|string',
         ];
     }
-
     public function failedValidation(Validator $validator)
     {
         $errors = (new ValidationException($validator))->errors();

@@ -13,8 +13,9 @@ class WhatsAppOtpStrategy implements OtpStrategy
 
     public function __construct()
     {
-        $this->instanceId = env('GREEN_API_INSTANCE_ID');
-        $this->token = env('GREEN_API_TOKEN');
+
+        $this->instanceId = config('app.green_instance_id');
+        $this->token = config('app.green_api_token');
     }
 
     public function send(string $receiver, string $code): bool

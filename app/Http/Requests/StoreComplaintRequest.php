@@ -9,7 +9,7 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
 
-class EmailRegisterRequest extends FormRequest
+class StoreComplaintRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -27,10 +27,12 @@ class EmailRegisterRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'first_name'=>'required|string',
-            'last_name'=>'required|string',
-            'email' => 'required|string|email|lowercase|email|unique:users,email',
-            'password' => 'required|string|min:6',
+            'organization_id' => ['required', 'exists:organizations,id'],
+            'title' => ['required', 'string', 'max:255'],
+            'type' => ['nullable', 'string', 'max:255'],
+            'description' => ['required', 'string'],
+            'location' => ['nullable', 'string', 'max:500'],
+            'attachments.*' => ['nullable', 'file', 'max:4096'], // 4MB لكل ملف
         ];
     }
 

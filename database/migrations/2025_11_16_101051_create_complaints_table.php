@@ -24,6 +24,7 @@ return new class extends Migration
             $table->string('title');
 
             $table->text('description');
+            $table->text('note')->nullable();
             $table->string('location')->nullable();
             $table->enum('status', [
                 'new',
@@ -36,7 +37,7 @@ return new class extends Migration
             ])->default('new');
 
             $table->foreignId('locked_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->timestamp('locked_at')->nullable();
+            $table->timestamp('locked_until')->nullable();
 
             $table->timestamps();
         });
