@@ -34,11 +34,5 @@ class CreateEmployeeRequest extends FormRequest
             'organization_id'  => 'required|exists:organizations,id',
         ];
     }
-    public function failedValidation(Validator $validator)
-    {
-        $errors = (new ValidationException($validator))->errors();
 
-        throw new HttpResponseException(
-            Response::Error( $errors, JsonResponse::HTTP_UNPROCESSABLE_ENTITY));
-    }
 }

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\Auth\OtpController;
+use App\Http\Controllers\Api\CitizenComplaintController;
 use App\Http\Controllers\Api\EmployeeController;
 use App\Http\Controllers\Api\ComplaintController;
 use App\Http\Controllers\OrganizationController;
@@ -50,30 +51,28 @@ Route::prefix('employees')->middleware(['auth:sanctum', \App\Http\Middleware\IsA
 
 });
 
+Route::prefix('complaints')->group(function () {
 
-Route::middleware('auth:sanctum')->prefix('complaints')
-    ->controller(ComplaintController::class)->group(function () {
-
-        Route::middleware(IsUser::class)->group(function () {
-            // citizen: create complaint
+    // ---------------- Citizen -------------------
+    Route::middleware(['auth:sanctum', IsUser::class])
+        ->controller(CitizenComplaintController::class)
+        ->group(function () {
             Route::post('/', 'store');
-
-            // citizen: my complaints
             Route::get('/me', 'myComplaints');
-
         });
 
-        Route::middleware(EmployeeOrAdmin::class)->group(function () {
-            // employee and admin
+    // ---------------- Employee -------------------
+    Route::middleware(['auth:sanctum', EmployeeOrAdmin::class])
+        ->controller(ComplaintController::class)
+        ->group(function () {
             Route::get('/', 'allComplaint');
-
-            // employee actions (you should protect with role middleware)
-            Route::get('/{complaint}/show', 'show');
-            Route::get('/{complaint}/unlock', 'unlock');
+            Route::get('/{complaint}', 'show');
             Route::put('/{complaint}/update', 'update');
+            Route::post('/{complaint}/lock', 'lock');
+            Route::post('/{complaint}/unlock', 'unlock');
         });
-
 });
+
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();

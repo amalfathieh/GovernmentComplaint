@@ -15,11 +15,11 @@ class Complaint extends Model
         'title',
         'description',
         'type',
+        'note',
         'location',
         'status',
         'user_id',
         'organization_id',
-        'assigned_to',
         'locked_until',
         'locked_by'
     ];
@@ -35,7 +35,6 @@ class Complaint extends Model
         });
     }
 
-    // العلاقات
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -46,10 +45,6 @@ class Complaint extends Model
         return $this->belongsTo(Organization::class);
     }
 
-    public function assignedTo()
-    {
-        return $this->belongsTo(User::class, 'assigned_to');
-    }
 
     public function attachments()
     {
@@ -67,28 +62,11 @@ class Complaint extends Model
         return $this->locked_until && $this->locked_until->isFuture();
     }
 
-    // حجز الشكوى لمنع التزامن
-    public function lockForUser(User $user, int $minutes = 30): bool
+    public function lockedByAnotherUser($userId): bool
     {
-        if ($this->isLocked() && $this->assigned_to !== $user->id) {
-            return false;
-        }
-
-        $this->update([
-            'assigned_to' => $user->id,
-            'locked_until' => now()->addMinutes($minutes)
-        ]);
-
-        return true;
-    }
-
-    // تحرير الشكوى
-    public function unlock(): void
-    {
-        $this->update([
-            'locked_by' => null,
-            'locked_until' => null
-        ]);
+        return $this->locked_by &&
+            $this->locked_by !== $userId &&
+            $this->isLocked();
     }
 
 

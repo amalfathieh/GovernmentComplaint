@@ -20,24 +20,6 @@ class ComplaintController extends Controller
         $this->complaintService = $complaintService;
     }
 
-    public function store(StoreComplaintRequest $request)
-    {
-        $complaint = $this->complaintService->createComplaint($request->validated() + [
-                'attachments' => $request->file('attachments') ?: []
-            ]);
-
-        return Response::Success($complaint, 'تم انشاء الشكوى بنجاح، ستتم مراجعتها من قبل المسؤولين', 201);
-
-    }
-
-    // my complaints (citizen)
-    public function myComplaints()
-    {
-        $result = $this->complaintService->myComplaints(Auth::id());
-        return Response::Success($result);
-
-    }
-
     //complaints for specific organization show by employee or admin
     public function allComplaint()
     {
@@ -49,11 +31,12 @@ class ComplaintController extends Controller
     public function show(Complaint $complaint)
     {
         try{
+            $this->authorize('view', $complaint);
             $complaint = $this->complaintService->showDetails($complaint);
 
             return Response::Success($complaint);
 
-        } catch (\RuntimeException $e) {
+        } catch (\Exception $e) {
             return Response::Error($e->getMessage(), 403);
         }
     }
@@ -62,9 +45,11 @@ class ComplaintController extends Controller
     public function update(UpdateComplaintByEmpolyeeRequest $request, Complaint $complaint)
     {
         try {
+            $this->authorize('update', $complaint);
+
             $complaint = $this->complaintService->update($complaint, $request->status, $request->note);
             return Response::Success($complaint, 'Complaint updated');
-        } catch (\RuntimeException $e) {
+        } catch (\Exception $e) {
             return Response::Error($e->getMessage(), 423);
         }
     }

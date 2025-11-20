@@ -34,12 +34,5 @@ class EmailRegisterRequest extends FormRequest
         ];
     }
 
-    public function failedValidation(Validator $validator)
-    {
-        $errors = (new ValidationException($validator))->errors();
 
-        throw new HttpResponseException(
-            Response::Error( $errors, JsonResponse::HTTP_UNPROCESSABLE_ENTITY)
-        );
-    }
 }
