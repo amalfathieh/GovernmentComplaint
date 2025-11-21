@@ -60,7 +60,7 @@ class ComplaintController extends Controller
     {
         try {
             $this->complaintService->lock($complaint);
-            return Response::Success( $complaint->fresh(), 'Locked for processing');
+            return Response::Success( null, 'Locked for processing');
 
         } catch (\RuntimeException $e) {
             return Response::Error($e->getMessage(), 423);

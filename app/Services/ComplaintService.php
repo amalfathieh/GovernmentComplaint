@@ -49,9 +49,9 @@ class ComplaintService
     // حجز شكوى للمعالجة
     public function lock(Complaint $complaint)
     {
-        $userId = Auth::id();
+
         if ($complaint->lockedByAnotherUser(Auth::id())) {
-            throw new \RuntimeException('Complaint is locked by another user.');
+            throw new \RuntimeException('.الشكوى قيد المعالجة من قبل مستخم اخر');
         }
 
         $complaint->update([
@@ -79,12 +79,15 @@ class ComplaintService
 
     public function allComplaint(){
         if (Auth::user()->role == 'admin'){
-            $complaints = Complaint::all();
+            $complaints = Complaint::with(['attachments','histories.user','organization'])
+                                    ->get();
             return $complaints;
         }
         $employee = Auth::user();
 
-        return Complaint::where('organization_id', $employee['organization_id'])->get();
+        return Complaint::with(['attachments','histories.user','organization'])
+                            ->where('organization_id', $employee['organization_id'])
+                            ->get();
 
     }
     public function showDetails(Complaint $complaint){

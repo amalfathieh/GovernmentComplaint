@@ -66,10 +66,10 @@ Route::prefix('complaints')->group(function () {
         ->controller(ComplaintController::class)
         ->group(function () {
             Route::get('/', 'allComplaint');
-            Route::get('/{complaint}', 'show');
+//            Route::get('/{complaint}', 'show');
             Route::put('/{complaint}/update', 'update');
-            Route::post('/{complaint}/lock', 'lock');
-            Route::post('/{complaint}/unlock', 'unlock');
+            Route::get('/{complaint}/lock', 'lock');
+            Route::get('/{complaint}/unlock', 'unlock');
         });
 });
 
