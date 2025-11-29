@@ -9,6 +9,7 @@ use App\Http\Responses\Response;
 use App\Models\Complaint;
 use App\Services\ComplaintService;
 use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Request;
 
 
 class ComplaintController extends Controller
@@ -21,21 +22,24 @@ class ComplaintController extends Controller
     }
 
     //complaints for specific organization show by employee or admin
-    public function allComplaint()
+    public function allComplaint(Request $request)
     {
-        $complaints = $this->complaintService->allComplaint();
-        return Response::Success($complaints);
+        try {
+            $complaints = $this->complaintService->allComplaint($request);
+            return Response::Success($complaints);
+        } catch (\Exception $e) {
+            return Response::Error($e->getMessage(), 403);
+        }
     }
 
     // show detail
     public function show(Complaint $complaint)
     {
-        try{
+        try {
             $this->authorize('view', $complaint);
             $complaint = $this->complaintService->showDetails($complaint);
 
             return Response::Success($complaint);
-
         } catch (\Exception $e) {
             return Response::Error($e->getMessage(), 403);
         }
@@ -60,11 +64,9 @@ class ComplaintController extends Controller
     {
         try {
             $this->complaintService->lock($complaint);
-            return Response::Success( null, 'Locked for processing');
-
+            return Response::Success(null, 'Locked for processing');
         } catch (\RuntimeException $e) {
             return Response::Error($e->getMessage(), 423);
-
         }
     }
 
@@ -74,10 +76,8 @@ class ComplaintController extends Controller
         try {
             $this->complaintService->unlock($complaint);
             return Response::Success(null, 'Unlocked');
-
         } catch (\RuntimeException $e) {
             return Response::Error($e->getMessage(), 403);
         }
     }
-
 }

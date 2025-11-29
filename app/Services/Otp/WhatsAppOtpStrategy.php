@@ -25,7 +25,8 @@ class WhatsAppOtpStrategy implements OtpStrategy
             $url = "https://7107.api.green-api.com/waInstance{$this->instanceId}/sendMessage/{$this->token}";
             $response = Http::post($url, [
                 'chatId' => $chatId,
-                'message' => "رمز التحقق الخاص بك هو: {$code}"
+                'message' => "رمز التحقق الخاص بك هو: {$code}
+                .صالح لمدة 30 دقيقة من وقت الارسال"
             ]);
 
             return $response->successful();

@@ -21,7 +21,7 @@ return new class extends Migration
 
             $table->string('type')->nullable();
 
-            $table->string('title');
+            $table->string('title')->nullable();
 
             $table->text('description');
             $table->text('note')->nullable();

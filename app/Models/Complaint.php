@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
+use App\Events\ComplaintUpdated;
+use App\Observers\ComplaintObserver;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str;
 
 class Complaint extends Model
 {
@@ -33,6 +34,11 @@ class Complaint extends Model
         static::creating(function (Complaint $complaint){
             $complaint->reference_number = self::generateReferenceNumber();
         });
+
+//        $oldSnapshot = $complaint->getOriginal();
+//        $newSnapshot = $complaint;
+//        event(new ComplaintUpdated($oldSnapshot, $newSnapshot));
+//        static::observe(ComplaintObserver::class);
     }
 
     public function user()

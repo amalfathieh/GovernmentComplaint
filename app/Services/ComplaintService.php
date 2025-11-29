@@ -77,19 +77,20 @@ class ComplaintService
     }
 
 
-    public function allComplaint(){
-        if (Auth::user()->role == 'admin'){
-            $complaints = Complaint::with(['attachments','histories.user','organization'])
-                                    ->get();
-            return $complaints;
+    public function allComplaint($request){
+        $user = Auth::user();
+        $query = Complaint::with(['attachments','histories.user','organization']);
+
+        if ($user->role == 'admin' && $request->has('organization_id')){
+            $query->where('organization_id', $request->organization_id);
         }
-        $employee = Auth::user();
 
-        return Complaint::with(['attachments','histories.user','organization'])
-                            ->where('organization_id', $employee['organization_id'])
-                            ->get();
-
+        if ($user->role == 'employee') {
+            $query->where('organization_id', $user->organization_id);
+        }
+        return $query->get();
     }
+
     public function showDetails(Complaint $complaint){
 
         if ($complaint->lockedByAnotherUser(Auth::id())) {

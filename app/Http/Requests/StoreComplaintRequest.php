@@ -28,7 +28,7 @@ class StoreComplaintRequest extends FormRequest
     {
         return [
             'organization_id' => ['required', 'exists:organizations,id'],
-            'title' => ['required', 'string', 'max:255'],
+            'title' => ['string', 'max:255'],
             'type' => ['nullable', 'string', 'max:255'],
             'description' => ['required', 'string'],
             'location' => ['nullable', 'string', 'max:500'],

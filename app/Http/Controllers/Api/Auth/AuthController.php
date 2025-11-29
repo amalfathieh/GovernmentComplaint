@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Services\Auth\EmailRegisterStrategy;
 use App\Services\Auth\PhoneRegisterStrategy;
 use Symfony\Component\HttpFoundation\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
@@ -44,12 +45,15 @@ class AuthController extends Controller
 
     public function login(LoginRequest $request)
     {
-        $user = User::where('email', $request->identifier)
-            ->orWhere('phone', $request->identifier)
-            ->first();
+        $type = filter_var($request->identifier, FILTER_VALIDATE_EMAIL) ? 'email' : 'phone';
+        $user = User::where($type, $request->identifier)->first();
 
         if (!$user) {
             return Response::Error('بيانات الدخول غير صحيحة', 401);
+        }
+
+        if (!Auth::attempt([$type => $request->identifier, 'password' => $request->password])) {
+            return Response::Error('البريد الإلكتروني وكلمة المرور لا يتطابقان مع سجلاتنا', 401);
         }
 
         if (!$user->email_verified_at && !$user->phone_verified_at) {
