@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Events\ComplaintUpdated;
 use App\Models\Complaint;
+use Illuminate\Support\Facades\Auth;
 
 class ComplaintObserver
 {
@@ -18,11 +19,20 @@ class ComplaintObserver
     /**
      * Handle the Complaint "updated" event.
      */
-    public function updated(Complaint $complaint): void
+//    public function updated(Complaint $complaint): void
+//    {
+//        $oldSnapshot = $complaint->getOriginal();
+//        $newSnapshot = $complaint->toArray();
+//        event(new ComplaintUpdated($oldSnapshot, $newSnapshot));
+//    }
+    public function updated(Complaint $complaint)
     {
-        $oldSnapshot = $complaint->getOriginal();
-        $newSnapshot = $complaint->toArray();
-        event(new ComplaintUpdated($oldSnapshot, $newSnapshot));
+        event(new ComplaintUpdated(
+            $complaint->getOriginal(),
+            $complaint->getAttributes(),
+            $complaint->id,
+            Auth::id()
+        ));
     }
 
     /**

@@ -34,11 +34,7 @@ class Complaint extends Model
         static::creating(function (Complaint $complaint){
             $complaint->reference_number = self::generateReferenceNumber();
         });
-
-//        $oldSnapshot = $complaint->getOriginal();
-//        $newSnapshot = $complaint;
-//        event(new ComplaintUpdated($oldSnapshot, $newSnapshot));
-//        static::observe(ComplaintObserver::class);
+        static::observe(ComplaintObserver::class);
     }
 
     public function user()

@@ -34,14 +34,6 @@ class ComplaintService
 
             $complaint->save();
 
-            // create full snapshot history
-            $complaint->histories()->create([
-                'user_id' => Auth::id(),
-                'action' => 'updated',
-                'old_snapshot' => $old,
-                'new_snapshot' => $complaint->fresh()->toArray(),
-            ]);
-
             return $complaint->fresh();
         });
     }

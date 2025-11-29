@@ -23,14 +23,12 @@ class LogComplaintHistory
      */
     public function handle(ComplaintUpdated $event): void
     {
-
-        // create full snapshot history
         ComplaintHistory::create([
-            'complaint_id' =>$event->oldSnapshot->id,
-            'user_id' => Auth::id(),
+            'complaint_id' => $event->complaintId,
+            'user_id' => $event->userId,
             'action' => 'updated',
-            'old_snapshot' => $event->oldSnapshot,
-            'new_snapshot' => $event->newSnapshot,
+            'old_snapshot' => $event->old,
+            'new_snapshot' => $event->new,
         ]);
 
     }
