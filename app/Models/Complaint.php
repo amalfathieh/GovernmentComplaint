@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Events\ComplaintUpdated;
 use App\Observers\ComplaintObserver;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -79,5 +80,18 @@ class Complaint extends Model
         } while (self::where('reference_number', $refNumber)->exists());
 
         return $refNumber;
+    }
+
+    public function scopeFilterStatus(Builder $builder, $filter){
+
+        $builder->when($filter['status'] ?? false, function($builder, $value) {
+            $builder->where('status', $value);
+        });
+    }
+
+    public function scopeFilterOrganization(Builder $builder, $filter){
+        $builder->when($filter['organization_id'] ?? false, function($builder, $value) {
+            $builder->where('organization_id','Like', $value);
+        });
     }
 }

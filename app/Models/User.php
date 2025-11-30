@@ -48,8 +48,9 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'phone_verified_at' => 'datetime',
+        'created_at' => 'datetime:Y-m-d H:i:s',
+        'updated_at' => 'datetime:Y-m-d H:i:s',
     ];
-
 
     public function scopeFilter(Builder $builder, $filter){
 

@@ -71,15 +71,16 @@ class ComplaintService
 
     public function allComplaint($request){
         $user = Auth::user();
-        $query = Complaint::with(['attachments','histories.user','organization']);
+        $query = Complaint::with(['attachments','histories.user','organization'])
+            ->filterStatus($request->query());
 
-        if ($user->role == 'admin' && $request->has('organization_id')){
-            $query->where('organization_id', $request->organization_id);
+        if ($user->role == 'admin'){
+            $query->filterOrganization($request->query());
         }
 
         if ($user->role == 'employee') {
             $query->where('organization_id', $user->organization_id);
-        }
+            }
         return $query->get();
     }
 
