@@ -4,6 +4,7 @@
 namespace App\Services;
 
 
+use App\Jobs\SendComplaintNotification;
 use App\Models\Complaint;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -33,6 +34,9 @@ class ComplaintService
                 ]);
 
             $complaint->save();
+
+            // إرسال الإشعار بالخلفية لصاحب الشكوى
+            dispatch(new SendComplaintNotification($complaint, $complaint->user));
 
             return $complaint->fresh();
         });

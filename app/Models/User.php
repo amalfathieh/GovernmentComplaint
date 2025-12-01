@@ -27,7 +27,8 @@ class User extends Authenticatable
         'user',
         'organization_id',
         'role',
-        'email_verified_at'
+        'email_verified_at',
+        'fcm_token',
     ];
 
     /**
@@ -51,6 +52,11 @@ class User extends Authenticatable
         'created_at' => 'datetime:Y-m-d H:i:s',
         'updated_at' => 'datetime:Y-m-d H:i:s',
     ];
+
+    public function routeNotificationForFcm()
+    {
+        return $this->fcm_token;
+    }
 
     public function scopeFilter(Builder $builder, $filter){
 
