@@ -13,8 +13,7 @@ class ComplaintHistory extends Model
     ];
 
     protected $casts = [
-        'old_snapshot' => 'array',
-        'new_snapshot' => 'array',
+        'old_snapshot' => 'array'
     ];
 
     public function complaint()

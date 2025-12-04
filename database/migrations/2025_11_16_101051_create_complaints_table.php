@@ -38,7 +38,7 @@ return new class extends Migration
 
             $table->foreignId('locked_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('locked_until')->nullable();
-
+            $table->unsignedBigInteger('version_number')->default(1);
             $table->timestamps();
         });
     }

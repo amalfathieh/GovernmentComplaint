@@ -82,6 +82,8 @@ Route::prefix('complaints')->group(function () {
     Route::middleware(['auth:sanctum', EmployeeOrAdmin::class])
         ->controller(ComplaintController::class)
         ->group(function () {
+            Route::get('/employee', 'allComplaintForEmployee');
+            Route::get('/admin', 'allComplaintForAdmin')->middleware(IsAdmin::class);
             Route::get('/', 'allComplaint');
 //            Route::get('/{complaint}', 'show');
             Route::put('/{complaint}/update', 'update');

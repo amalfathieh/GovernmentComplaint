@@ -23,7 +23,8 @@ class Complaint extends Model
         'user_id',
         'organization_id',
         'locked_until',
-        'locked_by'
+        'locked_by',
+        'version_number'
     ];
 
     protected $casts = [

@@ -18,25 +18,29 @@ class ComplaintService
         $this->fileService = $fileService;
     }
 
+
     public function update(Complaint $complaint, string $status = null, string $note = null)
     {
         $userId = Auth::id();
-        // ensure lock held by this user (or expired)
-        if ($complaint->lockedByAnotherUser(Auth::id())) {
-            throw new \RuntimeException('Complaint is locked by another user.');
-        }
 
-        return DB::transaction(function () use ($complaint, $status, $note) {
-            $old = $complaint->toArray();
-            $complaint->fill([
-                'status' => $status ?? $complaint->status,
-                'note' => $note ?? $complaint->note
-                ]);
+        return DB::transaction(function () use ($complaint, $status, $note, $userId) {
 
-            $complaint->save();
+            $complaint = Complaint::where('id', $complaint->id)
+                ->lockForUpdate()
+                ->first();
 
-            // إرسال الإشعار بالخلفية لصاحب الشكوى
-            dispatch(new SendComplaintNotification($complaint, $complaint->user));
+            // ensure lock held by this user (or expired)
+            if ($complaint->lockedByAnotherUser($userId)) {
+                throw new \RuntimeException('Complaint is locked by another user.');
+            }
+
+            $complaint->update([
+                'status'          => $status ?? $complaint->status,
+                'note'            => $note ?? $complaint->note,
+            ]);
+
+            //send notification to user
+            SendComplaintNotification::dispatch($complaint, $complaint->user);
 
             return $complaint->fresh();
         });
@@ -45,59 +49,77 @@ class ComplaintService
     // حجز شكوى للمعالجة
     public function lock(Complaint $complaint)
     {
+        DB::transaction(function () use ($complaint) {
 
-        if ($complaint->lockedByAnotherUser(Auth::id())) {
-            throw new \RuntimeException('.الشكوى قيد المعالجة من قبل مستخم اخر');
-        }
+            $complaint = Complaint::where('id', $complaint->id)->lockForUpdate()->first();
 
-        $complaint->update([
-            'locked_by' => Auth::id(),
-            'locked_until' => now()->addMinutes($this->lockMinutes),
-        ]);
+            if ($complaint->lockedByAnotherUser(Auth::id())) {
+                throw new \RuntimeException('الشكوى قيد المعالجة من قبل مستخدم آخر');
+            }
+
+            $complaint->update([
+                'locked_by' => Auth::id(),
+                'locked_until' => now()->addMinutes($this->lockMinutes),
+            ]);
+        });
         return true;
     }
 
     public function unlock(Complaint $complaint): bool
     {
-        // allow unlock if same user or expired
-        if ($complaint->lockedByAnotherUser(Auth::id())) {
-            throw new \RuntimeException('Cannot unlock, locked by another user.');
-        }
+        DB::transaction(function () use ($complaint) {
+            $complaint = Complaint::where('id', $complaint->id)->lockForUpdate()->first();
 
-        $complaint->update([
-            'locked_by' => null,
-            'locked_until' => null,
-        ]);
+            // allow unlock if same user or expired
+            if ($complaint->lockedByAnotherUser(Auth::id())) {
+                throw new \RuntimeException('Cannot unlock, locked by another user.');
+            }
+
+            $complaint->update([
+                'locked_by' => null,
+                'locked_until' => null,
+            ]);
+        });
 
         return true;
     }
 
 
-    public function allComplaint($request){
+    public function allComplaintForAdmin($request)
+    {
+
+        return Complaint::with(['attachments', 'histories.user', 'organization'])
+            ->filterStatus($request->query())
+            ->filterOrganization($request->query())
+            ->latest()
+            ->get();
+    }
+
+    public function allComplaintForEmployee($request)
+    {
         $user = Auth::user();
-        $query = Complaint::with(['attachments','histories.user','organization'])
+
+        return Complaint::with(['attachments'])
+            ->filterStatus($request->query())
+            ->where('organization_id', $user->organization_id)
+            ->latest()
+            ->get();
+    }
+
+    /*public function allComplaint($request)
+    {
+        $user = Auth::user();
+        $query = Complaint::with(['attachments', 'histories.user', 'organization'])
             ->filterStatus($request->query());
 
-        if ($user->role == 'admin'){
+        if ($user->role == 'admin') {
             $query->filterOrganization($request->query());
         }
 
         if ($user->role == 'employee') {
             $query->where('organization_id', $user->organization_id);
-            }
-        return $query->get();
-    }
-
-    public function showDetails(Complaint $complaint){
-
-        if ($complaint->lockedByAnotherUser(Auth::id())) {
-            throw new \RuntimeException('Complaint is locked by another user.');
         }
-
-        $this->lock($complaint);
-
-        return $complaint->load(['attachments','histories.user','organization']);
-
-    }
+        return $query->get();
+    }*/
 
 }

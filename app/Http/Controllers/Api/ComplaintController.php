@@ -31,6 +31,27 @@ class ComplaintController extends Controller
             return Response::Error($e->getMessage(), 403);
         }
     }
+    //complaints for specific organization show by employee or admin
+    public function allComplaintForAdmin(Request $request)
+    {
+        try {
+            $complaints = $this->complaintService->allComplaintForAdmin($request);
+            return Response::Success($complaints);
+        } catch (\Exception $e) {
+            return Response::Error($e->getMessage(), 403);
+        }
+    }
+
+    //complaints for specific organization show by employee or admin
+    public function allComplaintForEmployee(Request $request)
+    {
+        try {
+            $complaints = $this->complaintService->allComplaintForEmployee($request);
+            return Response::Success($complaints);
+        } catch (\Exception $e) {
+            return Response::Error($e->getMessage(), 403);
+        }
+    }
 
     // show detail
     public function show(Complaint $complaint)

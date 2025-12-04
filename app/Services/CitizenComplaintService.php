@@ -17,9 +17,9 @@ class CitizenComplaintService
     }
 
     // إنشاء شكوى جديدة مع Versioning
-    public function createComplaint(array $data )
+    public function createComplaint(array $data)
     {
-        return DB::transaction(function () use ( $data) {
+        return DB::transaction(function () use ($data) {
             $complaint = Complaint::create([
                 ...$data,
                 'user_id' => Auth::id(),
@@ -29,19 +29,11 @@ class CitizenComplaintService
             if (!empty($data['attachments'])) {
                 foreach ($data['attachments'] as $attachment) {
                     $complaint->attachments()->create([
-                        'file_path' => $this->fileService->upload($attachment, 'complaints'),// $attachment->store('complaints'),
+                        'file_path' => $this->fileService->upload($attachment, 'complaints'), // $attachment->store('complaints'),
                         'file_type' => $attachment->getMimeType(),
                     ]);
                 }
             }
-
-            // تسجيل في السجل التاريخي
-            $complaint->histories()->create([
-                'user_id' => Auth::id(),
-                'action' => 'created',
-                'old_snapshot' => null,
-                'new_snapshot' => $complaint->toArray(),
-            ]);
 
             return $complaint;
         });

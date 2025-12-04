@@ -17,14 +17,13 @@ class ComplaintUpdated
 
     public $old;
     public $new;
-    public $complaintId;
+    public $complaint;
     public $userId;
 
-    public function __construct($old, $new, $complaintId, $userId)
+    public function __construct($old, $complaint, $userId)
     {
         $this->old = $old;
-        $this->new = $new;
-        $this->complaintId = $complaintId;
+        $this->complaint = $complaint;
         $this->userId = $userId;
     }
     /**
