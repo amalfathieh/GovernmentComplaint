@@ -59,12 +59,12 @@ Route::middleware(['auth:sanctum', IsAdmin::class])->group(function (){
     Route::get('statistic', [StatisticsController::class,'statistic']);
 });
 
-Route::middleware(['auth:sanctum', IsUser::class])
+Route::prefix('notifications')->middleware(['auth:sanctum', IsUser::class])
     ->controller(\App\Http\Controllers\Api\NotificationController::class)->group(function (){
 
-        Route::get('/notifications', 'index');
-        Route::get('checkout', 'checkout');
-        Route::post('store', 'storeDeviceToken');
+        Route::get('/', 'index');
+        Route::get('/checkout', 'checkout');
+        Route::post('/token-store', 'storeDeviceToken');
 
     });
 

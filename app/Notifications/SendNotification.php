@@ -9,6 +9,10 @@ use Illuminate\Notifications\Notification;
 class SendNotification extends Notification implements ShouldQueue
 {
     use Queueable;
+
+    private $title;
+    private $body;
+
     public function __construct($title, $body)
     {
         $this->title = $title;
