@@ -1,7 +1,7 @@
 <?php
 
 
-namespace App\Services\Otp;
+namespace App\Services\Auth\Otp;
 
 use App\Http\Responses\Response;
 use App\Jobs\SendOtpJob;

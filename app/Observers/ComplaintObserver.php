@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Events\ComplaintUpdated;
 use App\Models\Complaint;
 use App\Models\ComplaintHistory;
+use App\Services\Admin\AuditService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -15,7 +16,12 @@ class ComplaintObserver
      */
     public function created(Complaint $complaint): void
     {
-        //
+        AuditService::log(
+            action: 'created_complaint',
+            model: 'Complaint',
+            modelId: $complaint->id,
+        );
+
     }
 
     /**
@@ -38,6 +44,13 @@ class ComplaintObserver
             $complaint,
             Auth::id()
         ));
+
+        AuditService::log(
+            action: 'updated_complaint',
+            model: 'Complaint',
+            modelId: $complaint->id
+        );
+
 
     }
 

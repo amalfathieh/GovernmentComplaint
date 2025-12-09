@@ -32,6 +32,12 @@ class EmployeeService
         // Send password by email
         $employee->notify(new NewEmployeeNotification($password));
 
+        AuditService::log(
+            action: 'add new employee',
+            model: 'User',
+            modelId: $employee->id
+        );
+
         return $employee;
 
     }

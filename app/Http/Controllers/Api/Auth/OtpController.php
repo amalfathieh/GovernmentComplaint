@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ResendOtpRequest;
 use App\Http\Requests\VerifyOtpRequest;
 use App\Http\Responses\Response;
-use App\Services\Otp\OtpService;
+use App\Services\Auth\Otp\OtpService;
 
 class OtpController extends Controller
 {

@@ -23,6 +23,7 @@ return new class extends Migration
             $table->enum('role', ['user', 'admin', 'employee'])->default('user');
             $table->foreignId('organization_id')->nullable()->constrained('organizations')->nullOnDelete();
             $table->text('fcm_token')->nullable();
+            $table->timestamp('locked_until')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

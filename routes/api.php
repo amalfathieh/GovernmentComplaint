@@ -30,9 +30,10 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('/register/email',  'registerByEmail');
     Route::post('/register/phone', 'registerByPhone');
 
-    // تسجيل الدخول
     Route::post('/login', 'login');
 });
+
+Route::get('logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
 Route::controller(OtpController::class)->group(function () {
     // التحقق من الحساب
@@ -45,27 +46,26 @@ Route::controller(OtpController::class)->group(function () {
 Route::get('organizations', [OrganizationController::class, 'getOrganizations']);
 
 
-Route::prefix('employees')->middleware(['auth:sanctum', IsAdmin::class])
-    ->controller(EmployeeController::class)->group(function () {
+Route::middleware(['auth:sanctum', IsAdmin::class])->group(function () {
 
+    Route::get('/audit-logs', [\App\Http\Controllers\Api\AuditLogController::class, 'logs']);
+
+    Route::prefix('employees')->controller(EmployeeController::class)->group(function () {
         Route::post('new', 'store');
-
         Route::get('/', 'getAll');
+    });
 
+    Route::get('users', [CitizenController::class, 'index']);
+
+    Route::get('statistic', [StatisticsController::class, 'statistic']);
 });
 
-Route::middleware(['auth:sanctum', IsAdmin::class])->group(function (){
-    Route::get('users', [CitizenController::class,'index']);
-    Route::get('statistic', [StatisticsController::class,'statistic']);
-});
-
-Route::prefix('notifications')->middleware(['auth:sanctum', IsUser::class])
-    ->controller(\App\Http\Controllers\Api\NotificationController::class)->group(function (){
+Route::prefix('notifications')->middleware(['auth:sanctum'])
+    ->controller(\App\Http\Controllers\Api\NotificationController::class)->group(function () {
 
         Route::get('/', 'index');
         Route::get('/checkout', 'checkout');
         Route::post('/token-store', 'storeDeviceToken');
-
     });
 
 Route::prefix('complaints')->group(function () {
@@ -85,7 +85,7 @@ Route::prefix('complaints')->group(function () {
             Route::get('/employee', 'allComplaintForEmployee');
             Route::get('/admin', 'allComplaintForAdmin')->middleware(IsAdmin::class);
             Route::get('/', 'allComplaint');
-//            Route::get('/{complaint}', 'show');
+            //Route::get('/{complaint}', 'show');
             Route::put('/{complaint}/update', 'update');
             Route::get('/{complaint}/lock', 'lock');
             Route::get('/{complaint}/unlock', 'unlock');

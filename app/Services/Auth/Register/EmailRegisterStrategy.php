@@ -1,13 +1,14 @@
 <?php
 
 
-namespace App\Services\Auth;
+namespace App\Services\Auth\Register;
 
 
 use App\Http\Responses\Response;
 use App\Jobs\SendOtpJob;
 use App\Models\User;
-use App\Services\Otp\OtpService;
+use App\Services\Admin\AuditService;
+use App\Services\Auth\Otp\OtpService;
 use Illuminate\Support\Facades\Hash;
 
 class EmailRegisterStrategy implements RegisterStrategy
@@ -26,6 +27,9 @@ class EmailRegisterStrategy implements RegisterStrategy
             $code = $otp->createOtp($user['email']);
 
             SendOtpJob::dispatch($user['email'], $code, 'email');
+
+            AuditService::log('user_register');
+
 
             return $user;
 

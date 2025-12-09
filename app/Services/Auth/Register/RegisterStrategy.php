@@ -1,7 +1,7 @@
 <?php
 
 
-namespace App\Services\Auth;
+namespace App\Services\Auth\Register;
 
 
 interface RegisterStrategy

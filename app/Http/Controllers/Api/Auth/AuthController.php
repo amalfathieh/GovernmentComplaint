@@ -7,11 +7,9 @@ use App\Http\Requests\EmailRegisterRequest;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\PhoneRegisterRequest;
 use App\Http\Responses\Response;
-use App\Models\User;
-use App\Services\Auth\EmailRegisterStrategy;
-use App\Services\Auth\PhoneRegisterStrategy;
-use Symfony\Component\HttpFoundation\Request;
-use Illuminate\Support\Facades\Auth;
+use App\Services\Auth\Login\LoginService;
+use App\Services\Auth\Register\EmailRegisterStrategy;
+use App\Services\Auth\Register\PhoneRegisterStrategy;
 
 class AuthController extends Controller
 {
@@ -23,8 +21,8 @@ class AuthController extends Controller
             $user = $strategy->register($request->validated());
 
             return Response::Success($user, 'Registered successfully and Verification code send to email pleas check your email');
-        }catch (\Exception $ex) {
-            return Response::Error( $ex->getMessage());
+        } catch (\Exception $ex) {
+            return Response::Error($ex->getMessage());
         }
     }
 
@@ -36,34 +34,32 @@ class AuthController extends Controller
             $user = $strategy->register($request->validated());
 
             return Response::Success($user, 'Registered successfully and Verification code send to whatsapp phone pleas check your whatsapp');
-
-        }catch (\Exception $ex) {
-            return Response::Error( $ex->getMessage());
+        } catch (\Exception $ex) {
+            return Response::Error($ex->getMessage());
         }
     }
 
-
-    public function login(LoginRequest $request)
+    public function login(LoginRequest $request, LoginService $loginService)
     {
-        $type = filter_var($request->identifier, FILTER_VALIDATE_EMAIL) ? 'email' : 'phone';
-        $user = User::where($type, $request->identifier)->first();
-
-        if (!$user) {
-            return Response::Error('بيانات الدخول غير صحيحة', 401);
+        try {
+            $data = $loginService->login($request);
+            return Response::Success($data, 'success');
+        } catch (\RuntimeException $ex) {
+            return Response::Error($ex->getMessage(), $ex->getCode());
+        } catch (\Exception $e) {
+            return Response::Error($e->getMessage());
         }
-
-        if (!Auth::attempt([$type => $request->identifier, 'password' => $request->password])) {
-            return Response::Error('البريد الإلكتروني وكلمة المرور لا يتطابقان مع سجلاتنا', 401);
-        }
-
-        if (!$user->email_verified_at && !$user->phone_verified_at) {
-            return Response::Error('الحساب غير مُفعّل. يرجى التحقق من الرمز.', 403);
-        }
-
-        $data['user'] = $user;
-        $data['token'] = $user->createToken('auth')->plainTextToken;
-
-        return Response::Success($data, 'success');
     }
 
+    public function logout()
+    {
+        try {
+            request()->user()->currentAccessToken()->delete();
+            return Response::Success(null);
+        } catch (\RuntimeException $ex) {
+            return Response::Error($ex->getMessage(), $ex->getCode());
+        } catch (\Exception $e) {
+            return Response::Error($e->getMessage());
+        }
+    }
 }
