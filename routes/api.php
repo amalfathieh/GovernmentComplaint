@@ -1,12 +1,12 @@
 <?php
 
+use App\Http\Controllers\Api\Admin\CitizenController;
+use App\Http\Controllers\Api\Admin\EmployeeController;
+use App\Http\Controllers\Api\Admin\StatisticsController;
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\Auth\OtpController;
 use App\Http\Controllers\Api\CitizenComplaintController;
-use App\Http\Controllers\Api\CitizenController;
-use App\Http\Controllers\Api\EmployeeController;
 use App\Http\Controllers\Api\ComplaintController;
-use App\Http\Controllers\Api\StatisticsController;
 use App\Http\Controllers\OrganizationController;
 use App\Http\Middleware\EmployeeOrAdmin;
 use App\Http\Middleware\IsAdmin;
@@ -48,12 +48,18 @@ Route::get('organizations', [OrganizationController::class, 'getOrganizations'])
 
 Route::middleware(['auth:sanctum', IsAdmin::class])->group(function () {
 
-    Route::get('/audit-logs', [\App\Http\Controllers\Api\AuditLogController::class, 'logs']);
+    Route::get('/audit-logs', [\App\Http\Controllers\Api\Admin\AuditLogController::class, 'logs']);
 
     Route::prefix('employees')->controller(EmployeeController::class)->group(function () {
         Route::post('new', 'store');
         Route::get('/', 'getAll');
     });
+
+    Route::prefix('export')->controller(\App\Http\Controllers\Api\Admin\ExportReportController::class)->group(function () {
+        Route::get('/complaints-xlsx', 'exportComplaintsXlsx');
+        Route::get('/complaints-pdf', 'exportComplaintsPdf');
+    });
+
 
     Route::get('users', [CitizenController::class, 'index']);
 

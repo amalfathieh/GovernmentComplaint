@@ -95,4 +95,20 @@ class Complaint extends Model
             $builder->where('organization_id','Like', $value);
         });
     }
+    public function scopeFilter($query, array $filters)
+    {
+        if (!empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+        if (!empty($filters['organization_id'])) {
+            $query->where('organization_id', $filters['organization_id']);
+        }
+        if (!empty($filters['from'])) {
+            $query->whereDate('created_at', '>=', $filters['from']);
+        }
+        if (!empty($filters['to'])) {
+            $query->whereDate('created_at', '<=', $filters['to']);
+        }
+        return $query->with(['user', 'organization']);
+    }
 }
