@@ -115,4 +115,22 @@ class User extends Authenticatable
         return $query;
     }
 
+
+    /*public function scopeFilterUsers($query, array $filters)
+    {
+        if (!empty($filters['role'])) {
+            $query->where('role', $filters['role']);
+        }
+        if (!empty($filters['organization_id'])) {
+            $query->where('organization_id', $filters['organization_id']);
+        }
+        if (!empty($filters['registered_after'])) {
+            $query->whereDate('created_at', '>=', $filters['registered_after']);
+        }
+        if (!empty($filters['registered_before'])) {
+            $query->whereDate('created_at', '<=', $filters['registered_before']);
+        }
+        return $query->with('organization');
+    }*/
+
 }

@@ -81,6 +81,7 @@ Route::prefix('complaints')->group(function () {
         ->controller(CitizenComplaintController::class)
         ->group(function () {
             Route::post('/', 'store');
+            Route::post('/{complaint}/update', 'update');
             Route::get('/me', 'myComplaints');
         });
 

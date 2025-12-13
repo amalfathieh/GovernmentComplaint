@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreComplaintRequest;
+use App\Http\Requests\UpdateComplaintRequest;
 use App\Http\Responses\Response;
+use App\Models\Complaint;
 use App\Services\CitizenComplaintService;
 use App\Services\ComplaintService;
 use Illuminate\Http\Request;
@@ -35,5 +37,24 @@ class CitizenComplaintController extends Controller
         $result = $this->citizenComplaintService->myComplaints(Auth::id());
         return Response::Success($result);
 
+    }
+
+
+    public function update(UpdateComplaintRequest $request, Complaint $complaint){
+        try {
+            $this->authorize('update', $complaint);
+
+            $this->citizenComplaintService->update($complaint, $request->validated() + [
+                    'attachments' => $request->file('attachments') ?: [],
+                    'version_number' => $request->input('version_number'),
+                ]);
+            return Response::Success(null, 'Complaint updated');
+
+        } catch (\RuntimeException $e) {
+            $code = $e->getCode() ?: 400;
+            return Response::Error($e->getMessage(), $code);
+        } catch (\Exception $e) {
+            return Response::Error('Unexpected error: ' . $e->getMessage(), 500);
+        }
     }
 }
