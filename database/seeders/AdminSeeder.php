@@ -18,7 +18,7 @@ class AdminSeeder extends Seeder
             'first_name'=> 'admin',
             'last_name'=> 'admin',
             'email'=> 'admin@gmail.com',
-            'phone' => '0987654321',
+            'phone' => '09876543210',
             'role' => 'admin',
             'password'=>Hash::make('admin123'),
              'email_verified_at' => now()

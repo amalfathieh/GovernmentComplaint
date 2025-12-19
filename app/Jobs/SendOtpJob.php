@@ -2,8 +2,8 @@
 
 namespace App\Jobs;
 
-use App\Services\Otp\EmailOtpStrategy;
-use App\Services\Otp\WhatsAppOtpStrategy;
+use App\Services\Auth\Otp\EmailOtpStrategy;
+use App\Services\Auth\Otp\WhatsAppOtpStrategy;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
