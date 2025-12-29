@@ -21,7 +21,8 @@ class ComplaintPolicy
      */
     public function view(User $user, Complaint $complaint): bool
     {
-        return $user->role === 'admin' || $user->organization_id === $complaint->organization_id;
+        return ($user->role === 'user'  && $user->id === $complaint->user_id) ||
+            ($user->role === 'employee' && $user->organization_id === $complaint->organization_id);
     }
 
     /**

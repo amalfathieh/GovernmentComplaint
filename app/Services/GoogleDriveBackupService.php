@@ -9,9 +9,9 @@ class GoogleDriveBackupService
     protected function getAccessToken()
     {
         $response = Http::post('https://oauth2.googleapis.com/token', [
-            'client_id'     => env('GOOGLE_DRIVE_CLIENT_ID'),
-            'client_secret' => env('GOOGLE_DRIVE_CLIENT_SECRET'),
-            'refresh_token' => env('GOOGLE_DRIVE_REFRESH_TOKEN'),
+            'client_id'     => config('services.google_drive.client_id'),
+            'client_secret' => config('services.google_drive.client_secret'),
+            'refresh_token' => config('services.google_drive.refresh_token'),
             'grant_type'    => 'refresh_token',
         ]);
 
@@ -40,4 +40,11 @@ class GoogleDriveBackupService
             ->post('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart');
     }
 
+
+    /*
+     *
+       'client_id'     => env('GOOGLE_DRIVE_CLIENT_ID'),
+            'client_secret' => env('GOOGLE_DRIVE_CLIENT_SECRET'),
+            'refresh_token' => env('GOOGLE_DRIVE_REFRESH_TOKEN'),
+     */
 }

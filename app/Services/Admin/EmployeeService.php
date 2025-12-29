@@ -8,9 +8,12 @@ use App\Models\User;
 use App\Notifications\NewEmployeeNotification;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use App\Traits\AuditLog;
 
 class EmployeeService
 {
+
+    use AuditLog;
 
     public function store($array)
     {
@@ -32,11 +35,9 @@ class EmployeeService
         // Send password by email
         $employee->notify(new NewEmployeeNotification($password));
 
-        AuditService::log(
-            action: 'add new employee',
-            model: 'User',
-            modelId: $employee->id
-        );
+        $this->auditLog('new_employee',
+            'User',
+            $employee->id);
 
         return $employee;
 
@@ -49,7 +50,8 @@ class EmployeeService
             ->filterByOrganization($request->organization_id)
             ->filterByName($request->name)
             ->filterByEmail($request->email)
-            ->get();
+            ->latest()
+            ->paginate(20);
 
         return $employees;
     }

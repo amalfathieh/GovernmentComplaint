@@ -15,7 +15,7 @@ return [
                  * The list of directories and files that will be included in the backup.
                  */
                 'include' => [
-                    base_path(),
+                    base_path('storage/app/public/complaints'),
                 ],
 
                 /*
@@ -197,7 +197,7 @@ return [
      */
     'notifications' => [
         'notifications' => [
-            \Spatie\Backup\Notifications\Notifications\BackupHasFailedNotification::class => ['mail'],
+            \Spatie\Backup\Notifications\Notifications\BackupHasFailedNotification::class => ['mail','telegram'],
             \Spatie\Backup\Notifications\Notifications\UnhealthyBackupWasFoundNotification::class => ['mail'],
             \Spatie\Backup\Notifications\Notifications\CleanupHasFailedNotification::class => ['mail'],
             \Spatie\Backup\Notifications\Notifications\BackupWasSuccessfulNotification::class => ['mail'],
@@ -205,6 +205,10 @@ return [
             \Spatie\Backup\Notifications\Notifications\CleanupWasSuccessfulNotification::class => ['mail'],
         ],
 
+        'telegram' => [
+            'bot_token' => env('TELEGRAM_BOT_TOKEN'),
+            'chat_id' => env('TELEGRAM_ADMIN_CHANNEL_ID'),
+        ],
         /*
          * Here you can specify the notifiable to which the notifications should be sent. The default
          * notifiable will use the variables specified in this config file.
@@ -212,7 +216,7 @@ return [
         'notifiable' => \Spatie\Backup\Notifications\Notifiable::class,
 
         'mail' => [
-            'to' => 'your@example.com',
+            'to' => 'amalfathieh@gmail.com',
 
             'from' => [
                 'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),

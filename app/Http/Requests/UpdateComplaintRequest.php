@@ -25,6 +25,7 @@ class UpdateComplaintRequest extends FormRequest
             'description' => [ 'string'],
             'location' => ['string', 'max:500'],
             'attachments.*' => ['nullable', 'file', 'max:4096'], // 4MB لكل ملف
+            'version_number' => ['integer', 'required']
         ];
     }
 }

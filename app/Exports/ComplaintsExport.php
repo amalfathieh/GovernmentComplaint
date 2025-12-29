@@ -4,11 +4,12 @@ namespace App\Exports;
 namespace App\Exports;
 
 use App\Models\Complaint;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 
-class ComplaintsExport implements FromQuery, WithHeadings, WithMapping
+class ComplaintsExport implements FromQuery, WithHeadings, WithMapping,ShouldQueue
 {
     protected $filters;
 

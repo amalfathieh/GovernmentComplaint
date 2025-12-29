@@ -7,9 +7,11 @@ use App\Http\Responses\Response;
 use App\Jobs\SendOtpJob;
 use App\Models\Otp;
 use App\Models\User;
+use App\Traits\AuditLog;
 
 class OtpService
 {
+    use AuditLog;
     public function createOtp($receiver){
         $code = rand(1000, 9999);
 
@@ -63,6 +65,8 @@ class OtpService
         $data['user'] = $user;
         $data['token'] = $user->createToken('auth')->plainTextToken;
 
+        $this->auditLog('verify_account', 'User');
+
         return Response::Success($data, 'تم تفعيل الحساب بنجاح');
     }
 
@@ -73,6 +77,8 @@ class OtpService
             $code = $this->createOtp($receiver);
 
             SendOtpJob::dispatch($receiver, $code, $type);
+
+            $this->auditLog('resend_code', 'User');
 
             return Response::Success(null, 'تم إعادة إرسال رمز التحقق');
 

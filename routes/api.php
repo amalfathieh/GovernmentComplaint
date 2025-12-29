@@ -7,7 +7,7 @@ use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\Auth\OtpController;
 use App\Http\Controllers\Api\CitizenComplaintController;
 use App\Http\Controllers\Api\ComplaintController;
-use App\Http\Controllers\OrganizationController;
+use App\Http\Controllers\Api\OrganizationController;
 use App\Http\Middleware\EmployeeOrAdmin;
 use App\Http\Middleware\IsAdmin;
 use App\Http\Middleware\IsUser;
@@ -58,6 +58,7 @@ Route::middleware(['auth:sanctum', IsAdmin::class])->group(function () {
     Route::prefix('export')->controller(\App\Http\Controllers\Api\Admin\ExportReportController::class)->group(function () {
         Route::get('/complaints-xlsx', 'exportComplaintsXlsx');
         Route::get('/complaints-pdf', 'exportComplaintsPdf');
+        Route::get('/complaints-csv', 'exportComplaintsCsv');
     });
 
 
@@ -99,6 +100,7 @@ Route::prefix('complaints')->group(function () {
         });
 });
 
+Route::get('test/telegram', [\App\Services\TelegramService::class, 'sendMessage']);
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();

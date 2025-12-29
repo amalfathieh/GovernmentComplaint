@@ -8,6 +8,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
 class UploadToGoogleDrive implements ShouldQueue
 {
@@ -25,11 +26,18 @@ class UploadToGoogleDrive implements ShouldQueue
     public function handle()
     {
         $service = new GoogleDriveBackupService();
-        $service->uploadFile($this->filePath, $this->fileName);
+        $response = $service->uploadFile($this->filePath, $this->fileName);
 
-        // حذف الملف بعد نجاح الرفع
-        if (file_exists($this->filePath)) {
-            unlink($this->filePath);
+        if ($response->successful()) {
+            Log::info("Backup Success: $this->fileName uploaded to Google Drive.");
+
+            // حذف الملف المحلي بعد التأكد من نجاح الرفع
+            if (file_exists($this->filePath)) {
+                unlink($this->filePath);
+            }
+        } else {
+            Log::error("Backup Upload Failed for $this->fileName. Error: " . $response->body());
         }
     }
+
 }

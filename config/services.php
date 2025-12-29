@@ -37,4 +37,14 @@ return [
     ],
 
 
+    'telegram' => [
+        'token' => env('TELEGRAM_BOT_TOKEN'),
+        'admin_channel' => env('TELEGRAM_ADMIN_CHANNEL_ID'),
+    ],
+
+    'google_drive' => [
+        'client_id'     => env('GOOGLE_DRIVE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_DRIVE_CLIENT_SECRET'),
+        'refresh_token' => env('GOOGLE_DRIVE_REFRESH_TOKEN'),
+    ],
 ];

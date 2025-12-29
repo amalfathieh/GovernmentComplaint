@@ -6,12 +6,13 @@ namespace App\Services\Auth\Login;
 use App\Jobs\SendLockedNotification;
 use App\Models\User;
 use App\Services\Admin\AuditService;
+use App\Traits\AuditLog;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 
 class LoginService
 {
-
+    use AuditLog;
     public function login($request)
     {
         $type = $this->resolveIdentifierType($request->identifier);
@@ -47,7 +48,7 @@ class LoginService
             throw new \RuntimeException('الحساب غير مُفعّل. يرجى التحقق من الرمز.', 403);
         }
 
-        AuditService::log('user_login', 'User');
+        $this->auditLog('user_login', 'User');
 
         return [
             'user'  => $user,

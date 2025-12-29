@@ -9,10 +9,12 @@ use App\Jobs\SendOtpJob;
 use App\Models\User;
 use App\Services\Admin\AuditService;
 use App\Services\Auth\Otp\OtpService;
+use App\Traits\AuditLog;
 use Illuminate\Support\Facades\Hash;
 
 class EmailRegisterStrategy implements RegisterStrategy
 {
+    use AuditLog;
     public function register(array $data)
     {
         try {
@@ -28,7 +30,7 @@ class EmailRegisterStrategy implements RegisterStrategy
 
             SendOtpJob::dispatch($user['email'], $code, 'email');
 
-            AuditService::log('user_register');
+            $this->auditLog('user_register');
 
 
             return $user;

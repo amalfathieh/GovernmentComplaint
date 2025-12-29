@@ -1,8 +1,10 @@
 <?php
 
+use Monolog\Handler\FilterHandler;
 use Monolog\Handler\NullHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
+use Monolog\Handler\TelegramBotHandler;
 
 return [
 
@@ -53,10 +55,18 @@ return [
     'channels' => [
         'stack' => [
             'driver' => 'stack',
-            'channels' => ['single'],
+            'channels' => ['daily', 'telegram'],
             'ignore_exceptions' => false,
         ],
+        "telegram" => [
+            'driver'  => 'monolog',
+            'handler' => FilterHandler::class,
+            'level' => env('LOG_LEVEL', 'debug'),
+            'with' => [
+                'handler' => new TelegramBotHandler($apiKey = env('TELEGRAM_BOT_TOKEN'), $channel = env('TELEGRAM_ADMIN_CHANNEL_ID'))
 
+            ]
+        ],
         'single' => [
             'driver' => 'single',
             'path' => storage_path('logs/laravel.log'),

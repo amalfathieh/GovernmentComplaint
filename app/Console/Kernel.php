@@ -15,6 +15,11 @@ class Kernel extends ConsoleKernel
         // $schedule->command('inspire')->hourly();
         // أو نسخة أسبوعية
          $schedule->command('backup:run')->weekly();
+
+        // تنفيذ النسخ الاحتياطي يومياً الساعة 12 ليلاً
+        //php artisan db:backup-to-drive
+        $schedule->command('db:backup-to-drive')->weekly();
+//        $schedule->command('db:backup-to-drive')->dailyAt('00:00');
     }
 
     /**

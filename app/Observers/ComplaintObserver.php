@@ -6,21 +6,21 @@ use App\Events\ComplaintUpdated;
 use App\Models\Complaint;
 use App\Models\ComplaintHistory;
 use App\Services\Admin\AuditService;
+use App\Traits\AuditLog;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class ComplaintObserver
 {
+    use AuditLog;
     /**
      * Handle the Complaint "created" event.
      */
     public function created(Complaint $complaint): void
     {
-        AuditService::log(
-            action: 'created_complaint',
+        $this->auditLog(action: 'created_complaint',
             model: 'Complaint',
-            modelId: $complaint->id,
-        );
+            modelId: $complaint->id);
 
     }
 
@@ -38,17 +38,17 @@ class ComplaintObserver
         if ($changedAttributes->isEmpty()) {
             return;
         }
-
+        // Saving Versioning
         event(new ComplaintUpdated(
             $complaint->getOriginal(),
             $complaint,
             Auth::id()
         ));
 
-        AuditService::log(
-            action: 'updated_complaint',
+        $this->auditLog( action: 'updated_complaint',
             model: 'Complaint',
-            modelId: $complaint->id
+            modelId: $complaint->id,
+            data: json_encode($complaint->getChanges()) // يسجل فقط ما تغير
         );
 
 

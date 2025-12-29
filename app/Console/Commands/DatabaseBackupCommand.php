@@ -24,7 +24,7 @@ class DatabaseBackupCommand extends Command
         // --- أولاً: نسخ قاعدة البيانات ---
         $dbHost = config('database.connections.mysql.host');
         $dbUser = config('database.connections.mysql.username');
-        $dbPass = config('database.connections.mysql.password_archive');
+        $dbPass = config('database.connections.mysql.password');
         $dbName = config('database.connections.mysql.database');
 
         $dbCommand = empty($dbPass)
@@ -60,8 +60,10 @@ class DatabaseBackupCommand extends Command
 
             $this->info('تمت إضافة مهام الرفع إلى الطابور (Queue). ستتم المعالجة في الخلفية.');
 
-            Log::info("Full Backup Success: DB and Attachments uploaded.");
+            $this->info("✅ تم الرفع بنجاح! اسم الملف: $filesFileName");
+            Log::info("Backup Success: $filesFileName uploaded to Google Drive.");
 
+            Log::info("Full Backup Success: DB and Attachments uploaded.");
         } catch (\Exception $e) {
             Log::info('حدث خطأ أثناء رفع نسخة احتياطية من قاعدة البيانات: ' . $e->getMessage());
 

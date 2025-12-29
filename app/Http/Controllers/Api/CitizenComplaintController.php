@@ -8,9 +8,9 @@ use App\Http\Requests\UpdateComplaintRequest;
 use App\Http\Responses\Response;
 use App\Models\Complaint;
 use App\Services\CitizenComplaintService;
-use App\Services\ComplaintService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class CitizenComplaintController extends Controller
 {
@@ -23,24 +23,36 @@ class CitizenComplaintController extends Controller
 
     public function store(StoreComplaintRequest $request)
     {
-        $complaint = $this->citizenComplaintService->createComplaint($request->validated() + [
-                'attachments' => $request->file('attachments') ?: []
-            ]);
+        try {
+            $complaint = $this->citizenComplaintService->createComplaint($request->validated() + [
+                    'attachments' => $request->file('attachments') ?: []
+                ]);
 
-        return Response::Success($complaint, 'تم انشاء الشكوى بنجاح، ستتم مراجعتها من قبل المسؤولين', 201);
+            return Response::Success($complaint, 'تم انشاء الشكوى بنجاح، ستتم مراجعتها من قبل المسؤولين', 201);
 
+        } catch (\Exception $exception) {
+            Log::error('Complaint create failed', ['exception' => $exception]);
+            return Response::Error('Unexpected error: ' . $exception->getMessage(), 500);
+
+        }
     }
 
     // my complaints (citizen)
     public function myComplaints()
     {
-        $result = $this->citizenComplaintService->myComplaints(Auth::id());
-        return Response::Success($result);
+        try {
+            $result = $this->citizenComplaintService->myComplaints(Auth::id());
+            return Response::Success($result);
+        }catch (\Exception $exception) {
+            Log::error('Complaint get failed', ['exception' => $exception]);
+            return Response::Error('Unexpected error: ' . $exception->getMessage(), 500);
 
+        }
     }
 
 
-    public function update(UpdateComplaintRequest $request, Complaint $complaint){
+    public function update(UpdateComplaintRequest $request, Complaint $complaint)
+    {
         try {
             $this->authorize('update', $complaint);
 
@@ -54,6 +66,10 @@ class CitizenComplaintController extends Controller
             $code = $e->getCode() ?: 400;
             return Response::Error($e->getMessage(), $code);
         } catch (\Exception $e) {
+            Log::error('Complaint update failed', [
+                'exception' => $e,
+                'complaint_id' => $complaint->id,
+            ]);
             return Response::Error('Unexpected error: ' . $e->getMessage(), 500);
         }
     }

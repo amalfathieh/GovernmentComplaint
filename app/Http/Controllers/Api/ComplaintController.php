@@ -3,34 +3,24 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreComplaintRequest;
 use App\Http\Requests\UpdateComplaintByEmpolyeeRequest;
 use App\Http\Responses\Response;
 use App\Models\Complaint;
-use App\Services\ComplaintService;
-use Illuminate\Support\Facades\Auth;
+use App\Repositories\Complaint\ComplaintServiceInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 
 class ComplaintController extends Controller
 {
-    private ComplaintService $complaintService;
 
-    public function __construct(ComplaintService $complaintService)
+    private ComplaintServiceInterface $complaintService;
+
+    public function __construct(ComplaintServiceInterface $complaintService)
     {
         $this->complaintService = $complaintService;
     }
 
-    //complaints for specific organization show by employee or admin
-    public function allComplaint(Request $request)
-    {
-        try {
-            $complaints = $this->complaintService->allComplaint($request);
-            return Response::Success($complaints);
-        } catch (\Exception $e) {
-            return Response::Error($e->getMessage(), 403);
-        }
-    }
+
     //complaints for specific organization show by employee or admin
     public function allComplaintForAdmin(Request $request)
     {
@@ -84,6 +74,8 @@ class ComplaintController extends Controller
     public function lock(Complaint $complaint)
     {
         try {
+            $this->authorize('view', $complaint);
+
             $this->complaintService->lock($complaint);
             return Response::Success(null, 'Locked for processing');
         } catch (\RuntimeException $e) {
@@ -95,6 +87,8 @@ class ComplaintController extends Controller
     public function unlock(Complaint $complaint)
     {
         try {
+            $this->authorize('view', $complaint);
+
             $this->complaintService->unlock($complaint);
             return Response::Success(null, 'Unlocked');
         } catch (\RuntimeException $e) {

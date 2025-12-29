@@ -12,6 +12,7 @@ class ComplaintReportService
     public function generateReport(array $filters = []): Collection
     {
         return Complaint::filter($filters)
+            ->limit(1000)
             ->get()
             ->map(function ($complaint) {
                 return [
