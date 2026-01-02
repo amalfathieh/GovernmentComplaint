@@ -56,7 +56,7 @@ class ExportReportController extends Controller
         return response()->streamDownload(function () {
             $handle = fopen('php://output', 'w');
 
-            fputcsv($handle, ['reference_number', 'citizenName', 'organization_name', 'type','title', 'status', 'location', 'data']);
+            fputcsv($handle, ['reference_number', 'citizenName', 'organization_name', 'type','title', 'status', 'location', 'date']);
 
             Complaint::chunk(500, function ($complaints) use ($handle) {
                 foreach ($complaints as $c) {

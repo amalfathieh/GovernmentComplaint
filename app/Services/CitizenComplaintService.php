@@ -4,6 +4,7 @@
 namespace App\Services;
 
 
+use App\Events\ComplaintUpdated;
 use App\Models\Complaint;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -38,7 +39,6 @@ class CitizenComplaintService
             return $complaint;
         });
     }
-
     public function update($complaint, array $data)
     {
         // Check status
@@ -52,20 +52,33 @@ class CitizenComplaintService
         }
 
         return $this->runInTransaction(function () use ($data, $complaint) {
+// 1. تصوير الحالة قبل التعديل
+            $oldSnapshot = $complaint->toArray();
+            $oldSnapshot['attachments'] = $complaint->attachments->toArray();
+
+            // 2. تحديث البيانات النصية
             $complaint->update([
                 'description' => $data['description'] ?? $complaint->description,
-                'location' => $data['location'] ?? $complaint->location,
+                'location'    => $data['location'] ?? $complaint->location,
             ]);
 
-            // حفظ المرفقات الجديدة
-            $this->saveAttachments($data['attachments'], $complaint);
+            // 3. معالجة المرفقات
+            $attachmentsChanged = false;
+            if (!empty($data['attachments'])) {
+                $this->saveAttachments($data['attachments'], $complaint);
+                $attachmentsChanged = true;
+            }
+
+            // 4. إطلاق الـ Event بناءً على ما حدث
+            if ($complaint->wasChanged() || $attachmentsChanged) {
+                event(new ComplaintUpdated($oldSnapshot, $complaint, Auth::id()));
+            }
 
             Cache::forget("my_complaints_user_{$complaint->user_id}");
             Cache::forget("employee_{$complaint->locked_by}_complaints");
+            return $complaint->fresh();
 
-            return $complaint;
         });
-
     }
 
     public function myComplaints($userId)

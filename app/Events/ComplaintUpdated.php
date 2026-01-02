@@ -15,17 +15,19 @@ class ComplaintUpdated
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $old;
-    public $new;
+    public $oldSnapshot;
     public $complaint;
     public $userId;
+    public $action;
 
-    public function __construct($old, $complaint, $userId)
+    public function __construct($oldSnapshot, $complaint, $userId, $action = 'updated')
     {
-        $this->old = $old;
+        $this->oldSnapshot = $oldSnapshot;
         $this->complaint = $complaint;
         $this->userId = $userId;
+        $this->action = $action;
     }
+
     /**
      * Get the channels the event should broadcast on.
      *

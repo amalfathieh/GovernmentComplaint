@@ -4,6 +4,7 @@
 namespace App\Repositories\Complaint;
 
 
+use App\Events\ComplaintUpdated;
 use App\Jobs\SendComplaintNotification;
 use App\Models\Complaint;
 use Illuminate\Support\Facades\Auth;
@@ -27,12 +28,17 @@ class ComplaintService implements ComplaintServiceInterface
         if ($complaint->lockedByAnotherUser($userId)) {
             throw new \RuntimeException('Complaint is locked by another user.');
         }
+        $oldSnapshot = $complaint->toArray();
+        $oldSnapshot['attachments'] = $complaint->attachments->toArray();
 
         $complaint->update([
             'status' => $status ?? $complaint->status,
             'note' => $note ?? $complaint->note,
         ]);
 
+        if ($complaint->wasChanged()) {
+            event(new ComplaintUpdated($oldSnapshot, $complaint, Auth::id(), 'status_changed'));
+        }
         //send notification to user
         SendComplaintNotification::dispatch($complaint, $complaint->user);
 
@@ -83,7 +89,10 @@ class ComplaintService implements ComplaintServiceInterface
         $filter = request()->only(['status', 'organization_id']);
 
         return Cache::remember($key, now()->addMinutes(3), function () use ($filter, $request) {
-            return Complaint::with(['attachments', 'histories.user', 'organization'])
+            return Complaint::with(['attachments:id,complaint_id,file_path,file_type',
+                'histories.user:id,first_name,last_name,role',
+                'organization:id,name'
+            ])
                 ->filterStatus($filter)
                 ->filterOrganization($filter)
                 ->latest()

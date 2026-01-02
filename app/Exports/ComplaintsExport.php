@@ -26,6 +26,7 @@ class ComplaintsExport implements FromQuery, WithHeadings, WithMapping,ShouldQue
     public function headings(): array
     {
         return [
+            '#',
             'رقم الشكوى',
             'اسم المواطن',
             'الجهة الحكومية',
@@ -40,6 +41,7 @@ class ComplaintsExport implements FromQuery, WithHeadings, WithMapping,ShouldQue
     public function map($complaint): array
     {
         return [
+            $complaint->id,
             $complaint->reference_number,
             $complaint->user ? $complaint->user->first_name . ' ' . $complaint->user->last_name : 'غير معروف',
             $complaint->organization ? $complaint->organization->name : 'غير محددة',
@@ -50,4 +52,9 @@ class ComplaintsExport implements FromQuery, WithHeadings, WithMapping,ShouldQue
             $complaint->created_at->format('Y-m-d'),
         ];
     }
+
+//    public function chunkSize(){
+//        return 1000;
+//    }
+
 }

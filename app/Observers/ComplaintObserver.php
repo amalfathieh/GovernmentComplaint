@@ -29,29 +29,12 @@ class ComplaintObserver
      */
     public function updated(Complaint $complaint)
     {
-
-        $excludedFields = ['locked_by', 'locked_until', 'updated_at', 'version_number'];
-
-        $changedAttributes = collect($complaint->getDirty())->except($excludedFields);
-
-        // إذا لم يتغير شيء جوهري، نتوقف.
-        if ($changedAttributes->isEmpty()) {
-            return;
-        }
-        // Saving Versioning
-        event(new ComplaintUpdated(
-            $complaint->getOriginal(),
-            $complaint,
-            Auth::id()
-        ));
-
-        $this->auditLog( action: 'updated_complaint',
+        $this->auditLog(
+            action: 'updated_complaint_record',
             model: 'Complaint',
             modelId: $complaint->id,
-            data: json_encode($complaint->getChanges()) // يسجل فقط ما تغير
+            data: json_encode($complaint->getChanges())
         );
-
-
     }
 
     /**
