@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Traits\AuditLog;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -11,7 +12,7 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, AuditLog;
 
     /**
      * The attributes that are mass assignable.
@@ -60,12 +61,13 @@ class User extends Authenticatable
         return $this->fcm_token;
     }
 
-    public function scopeFilter(Builder $builder, $filter){
+    public function scopeFilter(Builder $builder, $filter)
+    {
 
-        $builder->when($filter['organization'] ?? false, function($builder, $value) {
-            $builder->where('organization','Like', "%{$value}%");
+        $builder->when($filter['organization'] ?? false, function ($builder, $value) {
+            $builder->where('organization', 'Like', "%{$value}%");
         });
-        $builder->when($filter['status'] ?? false, function($builder, $value) {
+        $builder->when($filter['status'] ?? false, function ($builder, $value) {
             $builder->where('status', $value);
         });
     }
@@ -132,5 +134,4 @@ class User extends Authenticatable
         }
         return $query->with('organization');
     }*/
-
 }

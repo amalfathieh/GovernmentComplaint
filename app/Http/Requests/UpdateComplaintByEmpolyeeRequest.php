@@ -27,7 +27,7 @@ class UpdateComplaintByEmpolyeeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'status' => 'nullable|in:new,under_review,in_progress,need_info,resolved,rejected,closed',
+            'status' => 'nullable|in:new,in_progress,need_info,resolved,rejected',
             'note' => 'nullable|string',
         ];
     }

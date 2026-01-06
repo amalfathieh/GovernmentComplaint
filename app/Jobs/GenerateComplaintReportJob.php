@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Jobs;
+/*namespace App\Jobs;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -15,7 +15,7 @@ class GenerateComplaintReportJob implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct()
+/*public function __construct()
     {
         //
     }
@@ -23,17 +23,19 @@ class GenerateComplaintReportJob implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(): void
+/*public function handle(): void
     {
         //
     }
-}
-/*
+}*/
+
 
 namespace App\Jobs;
 
 use App\Exports\ComplaintsExport;
 use App\Models\User;
+use App\Services\Admin\ComplaintReportService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -48,82 +50,74 @@ class GenerateComplaintReportJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected $user;
+    // protected $user;
     protected $filters;
     protected $reportType; // 'xlsx' or 'pdf'
+    protected $token;
 
     /**
      * Create a new job instance.
+     *
      */
-   /* public function __construct(User $user, array $filters, string $reportType = 'xlsx')
+    public function __construct(array $filters, string $reportType = 'xlsx')
     {
-        $this->user = $user;
+        $this->token = config('services.telegram.token');
+
+        // $this->user = $user;
         $this->filters = $filters;
         $this->reportType = $reportType;
-    }*/
+    }
 
     /**
      * Execute the job.
      */
-    /*public function handle()
+    public function handle()
     {
         try {
             $fileName = 'reports/complaints_' . now()->format('Y_m_d_H_i_s') . '.' . $this->reportType;
 
-            // 1. توليد الملف وتخزينه مباشرة على الـ Disk الخارجي (S3)
-            // ملاحظة: Excel::store تدعم التخزين المباشر مما يقلل استهلاك الرام
-            if ($this->reportType === 'xlsx') {
-                Excel::store(new ComplaintsExport($this->filters), $fileName, 's3');
-            } else {
-                // في حالة PDF قد تحتاج لحفظه مؤقتاً ثم رفعه (يعتمد على المكتبة)
-                // هنا مثال مبسط للـ PDF
-                $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('reports.complaints_pdf', [
-                    'complaints' => \App\Models\Complaint::filter($this->filters)->get()
-                ]);
-                Storage::disk('s3')->put($fileName, $pdf->output());
+            if ($this->reportType === 'xlsx' || $this->reportType === 'csv') {
+                Excel::store(new ComplaintsExport($this->filters), $fileName, 'public');
+            } else if ($this->reportType === 'pdf') {
+                $reportService = new ComplaintReportService();
+                $complaints = $reportService->generateReport($this->filters);
+                $pdf = Pdf::loadView('reports.complaints_pdf', compact('complaints'))
+                    ->setPaper('A4', 'portrait');
+                Storage::disk('public')->put($fileName, $pdf->output());
             }
 
-            // 2. الحصول على رابط الملف (Temporary URL لزيادة الأمان)
-            // الرابط صالح لمدة ساعة واحدة مثلاً
-            $url = Storage::disk('s3')->temporaryUrl($fileName, now()->addHour());
-
-            // 3. إرسال الرابط إلى التلغرام
+            $url = asset('storage/' . $fileName);
+            // 3. Send download Url by Telegram
             $this->sendTelegramNotification($url);
-
         } catch (\Exception $e) {
             // تسجيل الخطأ في حال حدوث مشكلة
-            Log::error("Failed to generate report for user {$this->user->id}: " . $e->getMessage());
-            // يمكن هنا إرسال إشعار فشل للمستخدم أيضاً
+            Log::error("Failed to generate report for user : " . $e->getMessage());
         }
     }
 
     protected function sendTelegramNotification($fileUrl)
     {
-        // تأكد من وضع التوكن والـ Chat ID في ملف .env
         $botToken = env('TELEGRAM_BOT_TOKEN');
+        $chatId = env('TELEGRAM_ADMIN_CHANNEL_ID');
 
-        // في هذا السيناريو، نفترض أن الـ chat_id الخاص بالمشرف أو الموظف مخزن في الداتابيز
-        // أو يمكنك إرساله لقناة إدارية ثابتة
-        $chatId = $this->user->telegram_chat_id ?? env('TELEGRAM_ADMIN_CHANNEL_ID');
-
+        // استخدام النص المباشر أحياناً أفضل لتجنب أخطاء الـ Markdown مع الروابط
         $message = "✅ *تم تجهيز التقرير بنجاح*\n\n";
-        $message .= "👤 الطالب: " . $this->user->first_name . "\n";
         $message .= "📄 النوع: " . strtoupper($this->reportType) . "\n";
-        $message .= "🔗 [اضغط هنا لتحميل الملف]($fileUrl)";
+        $message .= "🔗 رابط التحميل:\n" . $fileUrl; // إرسال الرابط كنص صريح
 
         Http::post("https://api.telegram.org/bot{$botToken}/sendMessage", [
             'chat_id' => $chatId,
             'text' => $message,
             'parse_mode' => 'Markdown',
         ]);
-    }*/
+    }
 
     /**
      * التعامل مع الفشل (اختياري)
      */
-   /* public function failed(\Throwable $exception)
+    public function failed(\Throwable $exception)
     {
         // إرسال تنبيه للمطورين أن الـ Queue فشلت
         Log::critical("Queue Failed: " . $exception->getMessage());
-
-}*/
+    }
+}

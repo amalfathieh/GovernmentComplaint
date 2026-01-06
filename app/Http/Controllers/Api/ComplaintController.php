@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateComplaintByEmpolyeeRequest;
 use App\Http\Responses\Response;
 use App\Models\Complaint;
 use App\Repositories\Complaint\ComplaintServiceInterface;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Request;
 
 
@@ -28,6 +29,7 @@ class ComplaintController extends Controller
             $complaints = $this->complaintService->allComplaintForAdmin($request);
             return Response::Success($complaints);
         } catch (\Exception $e) {
+            Log::error('Complaints get failed', ['exception' => $e]);
             return Response::Error($e->getMessage(), 403);
         }
     }
@@ -39,22 +41,11 @@ class ComplaintController extends Controller
             $complaints = $this->complaintService->allComplaintForEmployee($request);
             return Response::Success($complaints);
         } catch (\Exception $e) {
+            Log::error('Complaints get failed', ['exception' => $e]);
             return Response::Error($e->getMessage(), 403);
         }
     }
 
-    // show detail
-    public function show(Complaint $complaint)
-    {
-        try {
-            $this->authorize('view', $complaint);
-            $complaint = $this->complaintService->showDetails($complaint);
-
-            return Response::Success($complaint);
-        } catch (\Exception $e) {
-            return Response::Error($e->getMessage(), 403);
-        }
-    }
 
     // update (employee)
     public function update(UpdateComplaintByEmpolyeeRequest $request, Complaint $complaint)

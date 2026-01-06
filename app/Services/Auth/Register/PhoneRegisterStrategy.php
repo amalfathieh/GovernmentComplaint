@@ -11,32 +11,30 @@ use App\Services\Admin\AuditService;
 use App\Services\Auth\Otp\OtpService;
 use App\Services\Auth\Register\RegisterStrategy;
 use App\Traits\AuditLog;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 
 class PhoneRegisterStrategy implements RegisterStrategy
 {
     use AuditLog;
+
     public function register(array $data)
     {
-        try {
-            $user = User::create([
-                'first_name' => $data['first_name'],
-                'last_name' => $data['last_name'],
-                'phone' => $data['phone'],
-                'password' => Hash::make($data['password']),
-            ]);
+        $user = User::create([
+            'first_name' => $data['first_name'],
+            'last_name' => $data['last_name'],
+            'phone' => $data['phone'],
+            'password' => Hash::make($data['password']),
+        ]);
 
-            $otp = new OtpService();
-            $code = $otp->createOtp($user['phone']);
-            SendOtpJob::dispatch($user['phone'], $code, 'phone');
+        $otp = new OtpService();
+        $code = $otp->createOtp($user['phone']);
+        SendOtpJob::dispatch($user['phone'], $code, 'phone');
 
-            $this->auditLog('user_register');
+        $this->auditLog('user_register');
 
-            return $user;
+        Cache::forget("citizens");
 
-        }catch (\Exception $ex) {
-            return Response::Error( $ex->getMessage());
-        }
-
+        return $user;
     }
 }

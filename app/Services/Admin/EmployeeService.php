@@ -6,6 +6,7 @@ namespace App\Services\Admin;
 
 use App\Models\User;
 use App\Notifications\NewEmployeeNotification;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use App\Traits\AuditLog;
@@ -39,20 +40,25 @@ class EmployeeService
             'User',
             $employee->id);
 
+        Cache::forget("employees");
+
         return $employee;
 
     }
 
     public function get($request)
     {
-        $employees = User::with('organization')
-            ->employees()
-            ->filterByOrganization($request->organization_id)
-            ->filterByName($request->name)
-            ->filterByEmail($request->email)
-            ->latest()
-            ->paginate(20);
 
+        $employees =  Cache::remember("employees", now()->addMinutes(3), function () use ($request){
+            User::with('organization')
+                ->employees()
+                ->filterByOrganization($request->organization_id)
+                ->filterByName($request->name)
+                ->filterByEmail($request->email)
+                ->latest()
+                ->paginate(20);
+        }
+        );
         return $employees;
     }
 

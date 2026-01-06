@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\Response;
 use App\Services\FCMService;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Request;
 
 class NotificationController extends Controller
@@ -37,6 +38,7 @@ class NotificationController extends Controller
             $this->fcmService->create_device_token($request->fcm_token);
             return Response::Success(null);
         }catch (\Exception $ex) {
+            Log::error($ex->getMessage());
             return Response::Error($ex->getMessage());
         }
     }

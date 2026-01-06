@@ -28,12 +28,10 @@ return new class extends Migration
             $table->string('location')->nullable();
             $table->enum('status', [
                 'new',
-                'under_review',
                 'in_progress',
                 'need_info',
                 'resolved',
                 'rejected',
-                'closed'
             ])->default('new');
 
             $table->foreignId('locked_by')->nullable()->constrained('users')->nullOnDelete();

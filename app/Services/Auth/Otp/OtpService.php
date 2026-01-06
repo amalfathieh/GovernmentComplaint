@@ -12,7 +12,9 @@ use App\Traits\AuditLog;
 class OtpService
 {
     use AuditLog;
-    public function createOtp($receiver){
+
+    public function createOtp($receiver)
+    {
         $code = rand(1000, 9999);
 
         // حفظ الكود في قاعدة البيانات
@@ -70,20 +72,16 @@ class OtpService
         return Response::Success($data, 'تم تفعيل الحساب بنجاح');
     }
 
-    public function resend($receiver){
+    public function resend($receiver)
+    {
 
-        try {
-            $type = filter_var($receiver, FILTER_VALIDATE_EMAIL) ? 'email' : 'phone';
-            $code = $this->createOtp($receiver);
+        $type = filter_var($receiver, FILTER_VALIDATE_EMAIL) ? 'email' : 'phone';
+        $code = $this->createOtp($receiver);
 
-            SendOtpJob::dispatch($receiver, $code, $type);
+        SendOtpJob::dispatch($receiver, $code, $type);
 
-            $this->auditLog('resend_code', 'User');
+        $this->auditLog('resend_code', 'User');
 
-            return Response::Success(null, 'تم إعادة إرسال رمز التحقق');
-
-        }catch (\Exception $ex) {
-            return Response::Error( $ex->getMessage());
-        }
+        return Response::Success(null, 'تم إعادة إرسال رمز التحقق');
     }
 }

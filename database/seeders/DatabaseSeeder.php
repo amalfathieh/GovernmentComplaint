@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             AdminSeeder::class,
             OrganizationsSeeder::class,
             EmployeeSeeder::class,
+            ComplaintsSeeder::class,
         ]);
 
         User::factory(10)->create();

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Admin;
 use App\Exports\ComplaintsExport;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\Response;
+use App\Jobs\GenerateComplaintReportJob;
 use App\Models\Complaint;
 use App\Services\Admin\ComplaintReportService;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -20,7 +21,9 @@ class ExportReportController extends Controller
         try {
             $filters = request()->only(['status', 'organization_id', 'from', 'to']);
             $fileName = 'complaints_export_' . now()->format('Y_m_d_H_i_s') . '.xlsx';
-            return Excel::download(new ComplaintsExport($filters), $fileName);
+            GenerateComplaintReportJob::dispatch($filters, "xlsx");
+            return Response::Success(null, 'جاري تحضير التقرير في الخلفية، سيصلك إشعار عبر التلغرام فور انتهائه.');
+
         } catch (\Exception $e) {
             Log::error("Fail to Export xlsx: " . $e->getMessage());
             return Response::Error($e->getMessage(), 403);
@@ -30,22 +33,13 @@ class ExportReportController extends Controller
     public function exportComplaintsPdf(Request $request, ComplaintReportService $reportService)
     {
         try {
-            $complaints = $reportService->generateReport(request()->only(['status', 'organization_id', 'from', 'to']));
+            $filters = request()->only(['status', 'organization_id', 'from', 'to']);
 
-
-            $pdf = Pdf::loadView('reports.complaints_pdf', compact('complaints'))
-                ->setPaper('A4', 'portrait');
-
-            return response()->streamDownload(
-                fn() => print($pdf->output()),
-                'complaints_report_' . now()->format('Y_m_d_H_i_s') . '.pdf',
-                [
-                    'Content-Type' => 'application/pdf',
-                ]
-            );
+            GenerateComplaintReportJob::dispatch($filters, "pdf");
+            return Response::Success(null, 'جاري تحضير التقرير في الخلفية، سيصلك إشعار عبر التلغرام فور انتهائه.');
 
         } catch (\Exception $e) {
-            Log::error("PDF Stream Error: " . $e->getMessage());
+            Log::error("Fail to Export pdf: " . $e->getMessage());
             return Response::Error($e->getMessage(), 403);
         }
     }

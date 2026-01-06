@@ -7,6 +7,7 @@ use App\Http\Requests\ResendOtpRequest;
 use App\Http\Requests\VerifyOtpRequest;
 use App\Http\Responses\Response;
 use App\Services\Auth\Otp\OtpService;
+use Illuminate\Support\Facades\Log;
 
 class OtpController extends Controller
 {
@@ -17,8 +18,9 @@ class OtpController extends Controller
 
             return (new OtpService())->verify($request->receiver, $request->code);
 
-        }catch (\Exception $ex) {
-            return Response::Error( $ex->getMessage());
+        } catch (\Exception $ex) {
+            Log::error($ex->getMessage());
+            return Response::Error($ex->getMessage());
         }
     }
 
@@ -27,8 +29,9 @@ class OtpController extends Controller
         try {
             return (new OtpService())->resend($request->receiver);
 
-        }catch (\Exception $ex) {
-            return Response::Error( $ex->getMessage());
+        } catch (\Exception $ex) {
+            Log::error($ex->getMessage());
+            return Response::Error($ex->getMessage());
         }
     }
 

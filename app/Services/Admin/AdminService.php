@@ -14,7 +14,7 @@ class AdminService
     public function statistic()
     {
 
-        return Cache::remember('admin_stats', now()->addMinutes(10), function () {
+        return Cache::remember('admin_stats', now()->addMinutes(5), function () {
             $data = [];
             $data['citizensCount'] = User::where('role', 'user')->count();
             $data['employeesCount'] = User::where('role', 'employee')->count();

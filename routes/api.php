@@ -45,6 +45,11 @@ Route::controller(OtpController::class)->group(function () {
 
 Route::get('organizations', [OrganizationController::class, 'getOrganizations']);
 
+    Route::prefix('export')->controller(\App\Http\Controllers\Api\Admin\ExportReportController::class)->group(function () {
+        Route::get('/complaints-xlsx', 'exportComplaintsXlsx');
+        Route::get('/complaints-pdf', 'exportComplaintsPdf');
+        Route::get('/complaints-csv', 'exportComplaintsCsv');
+    });
 
 Route::middleware(['auth:sanctum', IsAdmin::class])->group(function () {
 
@@ -55,11 +60,6 @@ Route::middleware(['auth:sanctum', IsAdmin::class])->group(function () {
         Route::get('/', 'getAll');
     });
 
-    Route::prefix('export')->controller(\App\Http\Controllers\Api\Admin\ExportReportController::class)->group(function () {
-        Route::get('/complaints-xlsx', 'exportComplaintsXlsx');
-        Route::get('/complaints-pdf', 'exportComplaintsPdf');
-        Route::get('/complaints-csv', 'exportComplaintsCsv');
-    });
 
 
     Route::get('users', [CitizenController::class, 'index']);

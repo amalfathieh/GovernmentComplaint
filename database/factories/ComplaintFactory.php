@@ -19,21 +19,14 @@ class ComplaintFactory extends Factory
     public function definition(): array
     {
         return [
-            'user_id' => random_int(2, 11),
-            'organization_id' => random_int(1, 8),
-            'type' => $this->faker->word(),
-            'title' => $this->faker->sentence(),
+            'user_id' => \App\Models\User::where('role', 'user')->inRandomOrder()->first()->id ?? 1,
+            'organization_id' => \App\Models\Organization::inRandomOrder()->first()->id ?? 1,
+            'type' => $this->faker->randomElement(['إداري', 'فني', 'خدمي']),
+            'title' => $this->faker->sentence(4),
             'description' => $this->faker->paragraph(),
             'note' => $this->faker->sentence(),
             'location' => $this->faker->city(),
-            'status' => [ 'new',
-                'under_review',
-                'in_progress',
-                'need_info',
-                'resolved',
-                'rejected',
-                'closed'][rand(0, 6)],
-            'version_number' => random_int(1, 6),
+            'status' => 'new',
         ];
     }
 }

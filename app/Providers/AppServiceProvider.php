@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Repositories\CitizenComplaint\CitizenComplaintService;
+use App\Repositories\CitizenComplaint\CitizenComplaintServiceInterface;
+use App\Repositories\CitizenComplaint\TransactionalCitizenComplaintService;
 use App\Repositories\Complaint\ComplaintService;
 use App\Repositories\Complaint\ComplaintServiceInterface;
 use App\Repositories\Complaint\TransactionalComplaintService;
@@ -18,6 +21,9 @@ class AppServiceProvider extends ServiceProvider
             return new TransactionalComplaintService(new ComplaintService());
         });
 
+        $this->app->bind(CitizenComplaintServiceInterface::class, function () {
+            return new TransactionalCitizenComplaintService(new CitizenComplaintService());
+        });
     }
 
     /**

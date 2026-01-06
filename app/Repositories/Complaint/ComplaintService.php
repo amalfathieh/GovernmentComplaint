@@ -89,7 +89,9 @@ class ComplaintService implements ComplaintServiceInterface
         $filter = request()->only(['status', 'organization_id']);
 
         return Cache::remember($key, now()->addMinutes(3), function () use ($filter, $request) {
-            return Complaint::with(['attachments:id,complaint_id,file_path,file_type',
+            return Complaint::with([
+                'user:id,first_name,last_name',
+                'attachments:id,complaint_id,file_path,file_type',
                 'histories.user:id,first_name,last_name,role',
                 'organization:id,name'
             ])
@@ -107,7 +109,9 @@ class ComplaintService implements ComplaintServiceInterface
         $key = "employee_{$user->id}_complaints";
 
         return Cache::remember($key, now()->addMinutes(2), function () use ($filter, $user, $request) {
-            return Complaint::with(['attachments'])
+            return Complaint::with([
+                'user:id,first_name,last_name',
+                'attachments'])
                 ->filterStatus($filter)
                 ->where('organization_id', $user->organization_id)
                 ->latest()

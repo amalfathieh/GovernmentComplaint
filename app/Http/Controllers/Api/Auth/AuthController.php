@@ -10,6 +10,7 @@ use App\Http\Responses\Response;
 use App\Services\Auth\Login\LoginService;
 use App\Services\Auth\Register\EmailRegisterStrategy;
 use App\Services\Auth\Register\PhoneRegisterStrategy;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
@@ -22,6 +23,7 @@ class AuthController extends Controller
 
             return Response::Success($user, 'Registered successfully and Verification code send to email pleas check your email');
         } catch (\Exception $ex) {
+            Log::error($ex->getMessage());
             return Response::Error($ex->getMessage());
         }
     }
@@ -35,6 +37,7 @@ class AuthController extends Controller
 
             return Response::Success($user, 'Registered successfully and Verification code send to whatsapp phone pleas check your whatsapp');
         } catch (\Exception $ex) {
+            Log::error($ex->getMessage());
             return Response::Error($ex->getMessage());
         }
     }
@@ -47,6 +50,7 @@ class AuthController extends Controller
         } catch (\RuntimeException $ex) {
             return Response::Error($ex->getMessage(), $ex->getCode());
         } catch (\Exception $e) {
+            Log::error($e->getMessage());
             return Response::Error($e->getMessage());
         }
     }
@@ -57,8 +61,10 @@ class AuthController extends Controller
             request()->user()->currentAccessToken()->delete();
             return Response::Success(null);
         } catch (\RuntimeException $ex) {
+            Log::error($ex->getMessage());
             return Response::Error($ex->getMessage(), $ex->getCode());
         } catch (\Exception $e) {
+            Log::error($e->getMessage());
             return Response::Error($e->getMessage());
         }
     }

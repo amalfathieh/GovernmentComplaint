@@ -7,6 +7,7 @@ use App\Http\Requests\CreateEmployeeRequest;
 use App\Http\Responses\Response;
 use App\Services\Admin\EmployeeService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class EmployeeController extends Controller
 {
@@ -25,6 +26,7 @@ class EmployeeController extends Controller
             return Response::Success($employee, 'Employee created successfully and email sent.', 201);
 
         }catch (\Exception $ex){
+            Log::error('Employee create failed', ['exception' => $ex]);
             return Response::Error($ex->getMessage());
         }
     }
@@ -40,6 +42,7 @@ class EmployeeController extends Controller
             $employees = $this->employeeService->get($request);
             return Response::Success($employees);
         } catch (\Exception $e) {
+            Log::error('Employee get failed', ['exception' => $e]);
             return Response::Error($e->getMessage());
         }
     }
