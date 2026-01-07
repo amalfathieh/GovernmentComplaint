@@ -7,6 +7,7 @@ namespace App\Repositories\Complaint;
 use App\Events\ComplaintUpdated;
 use App\Jobs\SendComplaintNotification;
 use App\Models\Complaint;
+use App\Support\ComplaintCache;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -38,6 +39,7 @@ class ComplaintService implements ComplaintServiceInterface
 
         if ($complaint->wasChanged()) {
             event(new ComplaintUpdated($oldSnapshot, $complaint, Auth::id(), 'status_changed'));
+            ComplaintCache::bump();
         }
         //send notification to user
         SendComplaintNotification::dispatch($complaint, $complaint->user);
@@ -84,19 +86,24 @@ class ComplaintService implements ComplaintServiceInterface
 
     public function allComplaintForAdmin($request)
     {
-        $key = 'admin_complaints_' . md5(json_encode($request->query()));
+        $version = \App\Support\ComplaintCache::version();
 
-        $filter = request()->only(['status', 'organization_id']);
+        // 1. ترتيب الفلاتر لضمان ثبات المفتاح
+        $params = $request->query();
+        ksort($params);
 
-        return Cache::remember($key, now()->addMinutes(3), function () use ($filter, $request) {
+        // 2. المفتاح يحتوي على النسخة + بصمة الفلترة
+        $key = "admin_complaints_v{$version}_" . md5(json_encode($params));
+
+        return Cache::remember($key, now()->addMinutes(10), function () use ($params) {
             return Complaint::with([
                 'user:id,first_name,last_name',
                 'attachments:id,complaint_id,file_path,file_type',
                 'histories.user:id,first_name,last_name,role',
                 'organization:id,name'
             ])
-                ->filterStatus($filter)
-                ->filterOrganization($filter)
+                ->filterStatus($params) // تأكدي من تمرير $params كاملة
+                ->filterOrganization($params)
                 ->latest()
                 ->paginate(20);
         });
@@ -104,15 +111,22 @@ class ComplaintService implements ComplaintServiceInterface
 
     public function allComplaintForEmployee($request)
     {
-        $filter = request()->only('status');
         $user = Auth::user();
-        $key = "employee_{$user->id}_complaints";
+        $version = ComplaintCache::version();
 
-        return Cache::remember($key, now()->addMinutes(2), function () use ($filter, $user, $request) {
+        // ترتيب البارامترات لضمان دقة الكاش عند الفلترة (مثلاً حسب الحالة)
+        $params = $request->query();
+        ksort($params);
+
+        $key = "employee_{$user->id}_v{$version}_" . md5(json_encode($params));
+
+        return Cache::remember($key, now()->addMinutes(5), function () use ($params, $user) {
             return Complaint::with([
                 'user:id,first_name,last_name',
-                'attachments'])
-                ->filterStatus($filter)
+                'attachments',
+                'histories.user:id,first_name,last_name,role',
+            ])
+                ->filterStatus($params)
                 ->where('organization_id', $user->organization_id)
                 ->latest()
                 ->paginate(20);

@@ -21,26 +21,26 @@ class LoginService
         // حماية brute-force عبر RateLimiter
         $key = $this->loginRateLimiterKey($request->identifier);
 
-        if (RateLimiter::tooManyAttempts($key, 1)) {
+        // التحقق من القفل قبل أي شيء
+        if ($user && $user->locked_until && $user->locked_until->isFuture()) {
+            $remaining = $user->locked_until->diffInMinutes(now());
+            throw new \RuntimeException("الحساب مقفل. يرجى المحاولة بعد {$remaining} دقيقة.");
+        }
+
+        // محاولة الدخول (RateLimiter بـ 3 محاولات وليس محاولة واحدة)
+        if (RateLimiter::tooManyAttempts($key, 3)) {
             if ($user) {
                 $user->update(['locked_until' => now()->addMinutes(15)]);
                 SendLockedNotification::dispatch($user);
             }
-            throw new \RuntimeException('تم قفل الحساب مؤقتًا بسبب محاولات دخول فاشلة.', 403);
+            throw new \RuntimeException('محاولات كثيرة خاطئة. تم قفل الحساب 15 دقيقة.', 403);
         }
 
-        // تحقق من حالة الحساب (مقفل مؤقتًا)
-        if ($user && $user->locked_until && $user->locked_until->isFuture()) {
-            throw new \RuntimeException('.حسابك مقفل مؤقتًا حتى' . $user->locked_until->format('H:i'), 403);
+        if (!Auth::attempt([$type => $request->identifier, 'password' => $request->password])) {
+            RateLimiter::hit($key, 900); // حظر لـ 15 دقيقة بعد الفشل
+            throw new \RuntimeException('بيانات الاعتماد غير صحيحة.', 401);
         }
 
-        // try to login
-        if (!$user || !Auth::attempt([$type => $request->identifier, 'password' => $request->password])) {
-            RateLimiter::hit($key, 60);
-            throw new \RuntimeException('.المعرّف وكلمة المرور لا يتطابقان مع سجلاتنا', 401);
-        }
-
-        // نجاح الدخول → تصفير العداد
         RateLimiter::clear($key);
 
         // تحقق من التفعيل

@@ -5,6 +5,7 @@ namespace App\Traits;
 
 
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 trait AuditLog
 {
@@ -18,5 +19,7 @@ trait AuditLog
             'data' => $data,
             'ip_address' => request()->ip(),
         ]);
+        Cache::forget("audit_logs");
+
     }
 }

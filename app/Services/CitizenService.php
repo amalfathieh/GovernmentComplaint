@@ -12,7 +12,7 @@ class CitizenService
     public function get()
     {
         return Cache::remember("citizens", now()->addMinutes(3), function () {
-            User::where('role', 'user')
+            return User::where('role', 'user')
                 ->latest()
                 ->paginate(20);
         }

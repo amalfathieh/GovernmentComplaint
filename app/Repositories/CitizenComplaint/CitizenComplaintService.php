@@ -6,6 +6,7 @@ namespace App\Repositories\CitizenComplaint;
 
 use App\Events\ComplaintUpdated;
 use App\Models\Complaint;
+use App\Support\ComplaintCache;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -27,6 +28,7 @@ class CitizenComplaintService implements CitizenComplaintServiceInterface
 
         // حفظ المرفقات
         $this->saveAttachments($data['attachments'], $complaint);
+        ComplaintCache::bump();
 
         Cache::forget("my_complaints_user_{$complaint->user_id}");
         Cache::forget("employee_{$complaint->locked_by}_complaints");
@@ -66,6 +68,7 @@ class CitizenComplaintService implements CitizenComplaintServiceInterface
         // 4. إطلاق الـ Event بناءً على ما حدث
         if ($complaint->wasChanged() || $attachmentsChanged) {
             event(new ComplaintUpdated($oldSnapshot, $complaint, Auth::id()));
+            ComplaintCache::bump();
         }
 
         Cache::forget("my_complaints_user_{$complaint->user_id}");
@@ -75,17 +78,16 @@ class CitizenComplaintService implements CitizenComplaintServiceInterface
 
     public function myComplaints($userId)
     {
-        $result = Cache::remember(
-            "my_complaints_user_{$userId}",
-            now()->addMinutes(3),
-            function () use ($userId) {
-                return Complaint::where('user_id', $userId)
-                    ->with(['attachments', 'organization'])
-                    ->latest()
-                    ->orderBy('created_at', 'desc')
-                    ->paginate(20);
-            }
-        );
+        $version = ComplaintCache::version();
+        $key = "my_complaints_user_{$userId}_v{$version}";
+
+        $result = Cache::remember($key, now()->addMinutes(5), function () use ($userId) {
+            return Complaint::where('user_id', $userId)
+                ->with(['attachments', 'organization'])
+                ->latest()
+                ->paginate(20);
+        });
+
         return Response::Success($result);
     }
 
