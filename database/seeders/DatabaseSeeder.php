@@ -15,6 +15,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+
+        User::factory(10)->create();
+
         $this->call([
             AdminSeeder::class,
             OrganizationsSeeder::class,
@@ -22,7 +25,6 @@ class DatabaseSeeder extends Seeder
             ComplaintsSeeder::class,
         ]);
 
-        User::factory(10)->create();
         Complaint::factory(40)->create();
     }
 }
